@@ -1,0 +1,19 @@
+# Terraform working directory — created by terraform init, never commit
+.terraform/
+
+# State files — contain sensitive data including secrets
+terraform.tfstate
+terraform.tfstate.backup
+
+# Plan files — can contain sensitive values
+*.tfplan
+
+# Python (for the Flask app — Day 2+)
+__pycache__/
+*.pyc
+venv/
+.env
+
+# OS
+.DS_Store
+Thumbs.db
