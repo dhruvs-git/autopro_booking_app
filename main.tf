@@ -8,3 +8,11 @@ module "networking" {
   private_app_subnet_cidrs = var.private_app_subnet_cidrs
   private_db_subnet_cidrs = var.private_db_subnet_cidrs
 }
+
+
+module "security" {
+  source = "./modules/security"
+
+  name_prefix = local.name_prefix
+  vpc_id = module.networking.vpc_id
+}
