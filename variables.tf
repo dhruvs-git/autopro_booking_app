@@ -22,3 +22,28 @@ variable "region" {
   description = "The region of deployment"
   type = string
 }
+
+variable "vpc_cidr" {
+  description = "CIDR block for vpc"
+  type = string
+}
+
+variable "availability_zones" {
+  description = "List of AZs"
+  type = list(string)
+}
+
+variable "public_subnet_cidrs" {
+  description = "cidr blocks for public subnets"
+  type = list(string)
+}
+
+variable "private_app_subnet_cidrs" {
+  description = "cidr blocks for private app subnets - EC2 lives here"
+  type = list(string)
+}
+
+variable "private_db_subnet_cidrs" {
+  description = "cidr blocks for private db subnets RDS and Redis lives here"
+  type = list(string)
+}
