@@ -49,7 +49,7 @@ resource "aws_vpc_security_group_egress_rule" "alb_to_ec2" {
 
 resource "aws_security_group" "ec2" {
   name = "${var.name_prefix}-ec2-sg"
-  description = "EC2 — accepts from ALB only, all outbound for AWS API's"
+  description = "EC2 - accepts from ALB only, all outbound for AWS APIs"
   vpc_id = var.vpc_id
 
   tags = {
@@ -68,7 +68,7 @@ resource "aws_vpc_security_group_ingress_rule" "ec2_from_alb" {
 
 resource "aws_vpc_security_group_egress_rule" "ec2_all_outbound" {
   security_group_id = aws_security_group.ec2.id
-  description = "ALL OUTBOUND - for aws api's and package intalls"
+  description = "ALL OUTBOUND - for aws apis and package installs"
   ip_protocol       = "-1"
   cidr_ipv4         = "0.0.0.0/0"
 }
@@ -80,7 +80,7 @@ resource "aws_vpc_security_group_egress_rule" "ec2_all_outbound" {
 
 resource "aws_security_group" "rds" {
   name = "${var.name_prefix}-rds-sg"
-  description = "RDS — accepts from EC2 only port 3306"
+  description = "RDS - accepts from EC2 only port 3306"
   vpc_id = var.vpc_id
 
   tags = {
@@ -108,7 +108,7 @@ resource "aws_vpc_security_group_ingress_rule" "rds_from_ec2" {
 
 resource "aws_security_group" "redis" {
   name = "${var.name_prefix}-redis-sg"
-  description = "REDIS — accepts from EC2 only port 6379"
+  description = "REDIS - accepts from EC2 only port 6379"
   vpc_id = var.vpc_id
 
   tags = {
