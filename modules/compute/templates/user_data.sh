@@ -34,7 +34,7 @@ systemctl start amazon-ssm-agent
 echo "=== Cloning application code ==="
 cd /home/ec2-user
 git clone https://github.com/dhruvs-git/autopro_booking_app.git app
-cd app
+cd app/app
 
 # =============================================================================
 # STEP 4 — Install Python dependencies
@@ -89,7 +89,7 @@ After=network.target
 [Service]
 Type=simple
 User=ec2-user
-WorkingDirectory=/home/ec2-user/app
+WorkingDirectory=/home/ec2-user/app/app
 EnvironmentFile=/etc/autoserve/db.env
 ExecStart=/usr/bin/python3 app.py
 Restart=always
