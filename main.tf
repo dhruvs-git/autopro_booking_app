@@ -29,3 +29,16 @@ module "IAM" {
   region = var.region
   aws_account_id = data.aws_caller_identity.current.account_id
 }
+
+
+module "database" {
+  source = "./modules/database"
+
+  name_prefix = local.name_prefix
+  secret_path = local.secret_path
+  db_name = var.db_name
+  db_username = var.db_username
+  db_instance_class = var.db_instance_class
+  private_db_subnet_ids = module.networking.private_db_subnet_ids
+  rds_sg_id = module.security.rds_sg_id
+}

@@ -47,3 +47,18 @@ variable "private_db_subnet_cidrs" {
   description = "cidr blocks for private db subnets RDS and Redis lives here"
   type = list(string)
 }
+
+variable "db_name" {
+  description = "Database name to create inside RDS"
+  type        = string
+}
+
+variable "db_username" {
+  description = "Master username for RDS MySQL"
+  type        = string
+}
+
+variable "db_instance_class" {
+  description = "RDS instance type - db.t3.micro is Free Tier eligible"
+  type        = string
+}
