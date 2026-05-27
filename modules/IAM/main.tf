@@ -5,7 +5,7 @@ data "aws_iam_policy_document" "ec2_trust_policy" {
     effect  = "Allow"
     actions = ["sts:AssumeRole"]
 
-  principals {
+    principals {
       type        = "Service"
       identifiers = ["ec2.amazonaws.com"]
     }
@@ -20,7 +20,7 @@ resource "aws_iam_role" "ec2_role" {
 
   assume_role_policy = data.aws_iam_policy_document.ec2_trust_policy.json
   tags = {
-    Name = "${var.name_prefix}-ec2-role" 
+    Name = "${var.name_prefix}-ec2-role"
   }
 }
 
@@ -137,8 +137,8 @@ data "aws_iam_policy_document" "ec2_permissions" {
 
 # Attaching the permission to the role 
 resource "aws_iam_role_policy" "ec2_policy" {
-  name = "${var.name_prefix}-ec2-policy"
-  role = aws_iam_role.ec2_role.id
+  name   = "${var.name_prefix}-ec2-policy"
+  role   = aws_iam_role.ec2_role.id
   policy = data.aws_iam_policy_document.ec2_permissions.json
 }
 

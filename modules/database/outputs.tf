@@ -10,5 +10,5 @@ output "db_secret_name" {
 
 output "db_rds_endpoint" {
   description = "rds-endpoint for root output"
-  value = aws_db_instance.main.address
+  value       = aws_db_instance.main.address
 }

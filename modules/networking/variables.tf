@@ -10,27 +10,27 @@ variable "environment" {
 
 variable "name_prefix" {
   description = "resource name prefix - passed from root locals"
-  type = string
+  type        = string
 }
 
 variable "vpc_cidr" {
   description = "The ID of the VPC"
-  type = string
+  type        = string
 
   validation {
-    condition = can(cidrhost(var.vpc_cidr,0))
+    condition     = can(cidrhost(var.vpc_cidr, 0))
     error_message = "Enter a valid CIDR block"
   }
 }
 
 variable "availability_zones" {
   description = "List of AZ to deploy into"
-  type = list(string)
+  type        = list(string)
 }
 
 variable "public_subnet_cidrs" {
   description = "cidr block for public subnets"
-  type = list(string)
+  type        = list(string)
 
   validation {
     condition     = length(var.public_subnet_cidrs) == length(var.availability_zones)
@@ -40,7 +40,7 @@ variable "public_subnet_cidrs" {
 
 variable "private_app_subnet_cidrs" {
   description = "cidr block for app"
-  type = list(string)
+  type        = list(string)
 
   validation {
     condition     = length(var.private_app_subnet_cidrs) == length(var.availability_zones)
@@ -50,7 +50,7 @@ variable "private_app_subnet_cidrs" {
 
 variable "private_db_subnet_cidrs" {
   description = "cidr block for the db"
-  type = list(string)
+  type        = list(string)
 
   validation {
     condition     = length(var.private_db_subnet_cidrs) == length(var.availability_zones)

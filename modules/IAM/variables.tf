@@ -1,6 +1,6 @@
 variable "name_prefix" {
   description = "resource name prefix - passed from root locals"
-  type = string
+  type        = string
 }
 
 variable "region" {

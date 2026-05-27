@@ -11,7 +11,7 @@ resource "aws_secretsmanager_secret" "db_credentials" {
   name        = "${var.secret_path}/db-credentials"
   description = "RDS database password"
 
-  recovery_window_in_days = 7 
+  recovery_window_in_days = 7
 }
 
 
@@ -48,32 +48,32 @@ resource "aws_db_instance" "main" {
   # --- Size ---
   instance_class    = var.db_instance_class
   allocated_storage = 20
-  storage_type = "gp2"
+  storage_type      = "gp2"
   storage_encrypted = true
 
   # --- Database ---
   db_name  = var.db_name
   username = var.db_username
-  password = random_password.db_password.result 
+  password = random_password.db_password.result
 
   # --- Network ---
   db_subnet_group_name   = aws_db_subnet_group.main.name
   vpc_security_group_ids = [var.rds_sg_id]
 
 
-  publicly_accessible    = false  # never true in production
+  publicly_accessible     = false # never true in production
   backup_retention_period = 7
-  
 
-  multi_az = false  # true in production
+
+  multi_az            = false # true in production
   deletion_protection = false # true in production 
-  skip_final_snapshot     = true  # set false in production
+  skip_final_snapshot = true  # set false in production
 
   tags = {
     Name = "${var.name_prefix}-rds"
   }
 
   lifecycle {
-    ignore_changes = [ password ]
+    ignore_changes = [password]
   }
 }
