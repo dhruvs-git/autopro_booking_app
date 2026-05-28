@@ -67,3 +67,13 @@ variable "ec2_instance_type" {
   description = "Type of EC2 instance"
   type        = string
 }
+
+variable "admin_email" {
+  description = "Admin user email for Cognito"
+  type        = string
+}
+
+variable "redis_node_type" {
+  description = "ElastiCache node type"
+  type = string
+}

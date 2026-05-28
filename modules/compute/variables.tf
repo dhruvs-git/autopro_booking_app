@@ -53,3 +53,18 @@ variable "vpc_id" {
   description = "The vpc ID"
   type        = string
 }
+
+variable "redis_endpoint" {
+  description = "Redis endpoint - from cache module"
+  type        = string
+}
+
+variable "cognito_user_pool_id" {
+  description = "Cognito User Pool ID - from auth module"
+  type        = string
+}
+
+variable "cognito_client_id" {
+  description = "Cognito App Client ID - from auth module"
+  type        = string
+}

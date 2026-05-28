@@ -47,14 +47,40 @@ module "database" {
 module "compute" {
   source = "./modules/compute"
 
-  name_prefix = local.name_prefix
-  region = var.region
-  ec2_instance_type = var.ec2_instance_type
-  vpc_id = module.networking.vpc_id
-  public_subnet_ids = module.networking.public_subnet_ids
-  private_app_subnet_ids = module.networking.private_app_subnet_ids
-  ec2_sg_id = module.security.ec2_sg_id
-  alb_sg_id = module.security.alb_sg_id
+  name_prefix               = local.name_prefix
+  region                    = var.region
+  ec2_instance_type         = var.ec2_instance_type
+  vpc_id                    = module.networking.vpc_id
+  public_subnet_ids         = module.networking.public_subnet_ids
+  private_app_subnet_ids    = module.networking.private_app_subnet_ids
+  ec2_sg_id                 = module.security.ec2_sg_id
+  alb_sg_id                 = module.security.alb_sg_id
   ec2_instance_profile_name = module.IAM.ec2_instance_profile_name
-  db_secret_arn = module.database.db_secret_arn
+  db_secret_arn             = module.database.db_secret_arn
+  redis_endpoint            = module.cache.redis_endpoint
+  cognito_user_pool_id      = module.auth.user_pool_id
+  cognito_client_id         = module.auth.user_pool_client_id
+}
+
+
+
+#cognito
+module "auth" {
+  source = "./modules/auth"
+
+  name_prefix = local.name_prefix
+  admin_email = var.admin_email
+}
+
+
+#cache
+
+module "cache" {
+  source = "./modules/cache"
+
+  name_prefix = local.name_prefix
+  private_db_subnet_ids = module.networking.private_db_subnet_ids
+  redis_sg_id =   module.security.redis_sg_id
+  redis_node_type = var.redis_node_type
+
 }

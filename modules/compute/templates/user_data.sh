@@ -75,10 +75,23 @@ chmod 600 /etc/autoserve/db.env
 rm /tmp/db_secret.json
 
 # =============================================================================
-# STEP 6 — Create systemd service
+# STEP 6 — Write app config (Redis + Cognito)
+# Values are injected by Terraform templatefile() at provision time.
+# =============================================================================
+echo "=== Writing app configuration ==="
+cat > /etc/autoserve/app.env << 'EOF'
+REDIS_HOST=${redis_endpoint}
+COGNITO_USER_POOL_ID=${cognito_user_pool_id}
+COGNITO_CLIENT_ID=${cognito_client_id}
+AWS_REGION=${region}
+EOF
+chmod 600 /etc/autoserve/app.env
+
+# =============================================================================
+# STEP 7 — Create systemd service
 # systemd keeps Flask running permanently.
 # If Flask crashes, systemd restarts it automatically.
-# EnvironmentFile loads the DB credentials we just wrote.
+# Both EnvironmentFiles are loaded before Flask starts.
 # =============================================================================
 echo "=== Creating systemd service ==="
 cat > /etc/systemd/system/autoserve.service << 'EOF'
@@ -91,6 +104,7 @@ Type=simple
 User=ec2-user
 WorkingDirectory=/home/ec2-user/app/app
 EnvironmentFile=/etc/autoserve/db.env
+EnvironmentFile=/etc/autoserve/app.env
 ExecStart=/usr/bin/python3 app.py
 Restart=always
 RestartSec=5
@@ -102,7 +116,7 @@ WantedBy=multi-user.target
 EOF
 
 # =============================================================================
-# STEP 7 — Start Flask
+# STEP 8 — Start Flask
 # =============================================================================
 echo "=== Starting AutoServe Flask application ==="
 systemctl daemon-reload

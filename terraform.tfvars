@@ -12,3 +12,7 @@ ec2_instance_type = "t3.micro"
 db_name           = "autoserve"
 db_username       = "autoserve_admin"
 db_instance_class = "db.t3.micro"
+
+admin_email = "barotdhruv099@gmail.com"
+
+redis_node_type = "cache.t3.micro"

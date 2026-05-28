@@ -41,7 +41,7 @@ resource "aws_lb_target_group" "main" {
 
     enabled             = true
     path                = "/health"
-    port = "traffic-port"
+    port                = "traffic-port"
     protocol            = "HTTP"
     matcher             = "200"
     interval            = 30
@@ -59,7 +59,7 @@ resource "aws_lb_target_group" "main" {
 # The ALB Listener
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.main.arn
-  port              = "80"        # port internet hits
+  port              = "80" # port internet hits
   protocol          = "HTTP"
 
   default_action {
@@ -85,9 +85,12 @@ resource "aws_launch_template" "main" {
   }
 
   user_data = base64encode(templatefile("${path.module}/templates/user_data.sh", {
-    secret_arn = var.db_secret_arn
-    region = var.region
-    }))
+    secret_arn           = var.db_secret_arn
+    region               = var.region
+    redis_endpoint       = var.redis_endpoint
+    cognito_user_pool_id = var.cognito_user_pool_id
+    cognito_client_id    = var.cognito_client_id
+  }))
 
 
   block_device_mappings {
@@ -95,7 +98,7 @@ resource "aws_launch_template" "main" {
     ebs {
       volume_size           = 100
       volume_type           = "gp2"
-      encrypted = true
+      encrypted             = true
       delete_on_termination = true
 
     }
@@ -110,7 +113,7 @@ resource "aws_launch_template" "main" {
     enabled = true
   }
 
-  update_default_version = true  
+  update_default_version = true
 
   lifecycle {
     create_before_destroy = true
@@ -150,8 +153,8 @@ resource "aws_autoscaling_group" "main" {
   }
 
   # --- ALB Integration ---
-  target_group_arns = [aws_lb_target_group.main.arn]
-  health_check_type = "ELB"      # use ALB health checks, not just EC2
+  target_group_arns         = [aws_lb_target_group.main.arn]
+  health_check_type         = "ELB" # use ALB health checks, not just EC2
   health_check_grace_period = 300   # seconds before health check starts
 
 
@@ -170,7 +173,7 @@ resource "aws_autoscaling_group" "main" {
   tag {
     key                 = "Name"
     value               = "${var.name_prefix}-asg-instance"
-    propagate_at_launch = true   # tag gets applied to every EC2 launched
+    propagate_at_launch = true # tag gets applied to every EC2 launched
   }
 
 }
