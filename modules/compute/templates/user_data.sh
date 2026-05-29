@@ -40,7 +40,7 @@ cd app/app
 # STEP 4 — Install Python dependencies
 # =============================================================================
 echo "=== Installing Python dependencies ==="
-pip3 install -r requirements.txt
+pip3 install -r requirements.txt --ignore-installed
 
 # =============================================================================
 # STEP 5 — Fetch DB credentials from Secrets Manager
