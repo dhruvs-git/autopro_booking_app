@@ -37,10 +37,12 @@ git clone https://github.com/dhruvs-git/autopro_booking_app.git app
 cd app/app
 
 # =============================================================================
-# STEP 4 — Install Python dependencies
+# STEP 4 — Create virtualenv and install Python dependencies
+# venv isolates packages from system Python — no rpm conflicts ever.
 # =============================================================================
 echo "=== Installing Python dependencies ==="
-pip3 install -r requirements.txt --ignore-installed
+python3 -m venv /home/ec2-user/venv
+/home/ec2-user/venv/bin/pip install -r requirements.txt
 
 # =============================================================================
 # STEP 5 — Fetch DB credentials from Secrets Manager
@@ -105,7 +107,7 @@ User=ec2-user
 WorkingDirectory=/home/ec2-user/app/app
 EnvironmentFile=/etc/autoserve/db.env
 EnvironmentFile=/etc/autoserve/app.env
-ExecStart=/usr/bin/python3 app.py
+ExecStart=/home/ec2-user/venv/bin/python app.py
 Restart=always
 RestartSec=5
 StandardOutput=journal
