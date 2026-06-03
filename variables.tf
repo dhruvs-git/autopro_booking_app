@@ -75,5 +75,5 @@ variable "admin_email" {
 
 variable "redis_node_type" {
   description = "ElastiCache node type"
-  type = string
+  type        = string
 }

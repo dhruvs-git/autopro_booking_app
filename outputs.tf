@@ -28,3 +28,19 @@ output "redis_endpoint" {
   description = "Redis endpoint - needed for Flask cache configuration"
   value       = module.cache.redis_endpoint
 }
+
+
+output "cloudfront_url" {
+  description = "CloudFront distribution URL — this is your app's public address"
+  value       = module.frontend.cloudfront_url
+}
+
+output "cloudfront_distribution_id" {
+  description = "CloudFront distribution ID — used to invalidate cache after deployments"
+  value       = module.frontend.cloudfront_distribution_id
+}
+
+output "frontend_bucket_name" {
+  description = "S3 bucket name — upload frontend files here"
+  value       = module.frontend.frontend_bucket_name
+}

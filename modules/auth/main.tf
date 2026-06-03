@@ -61,9 +61,9 @@ resource "aws_cognito_user_pool_client" "main" {
   user_pool_id = aws_cognito_user_pool.main.id
 
   # --- Token expiry ---
-  access_token_validity  = 1    # hours
-  id_token_validity      = 1    # hours
-  refresh_token_validity = 30   # days
+  access_token_validity  = 1  # hours
+  id_token_validity      = 1  # hours
+  refresh_token_validity = 30 # days
 
   token_validity_units {
     access_token  = "hours"
@@ -73,15 +73,15 @@ resource "aws_cognito_user_pool_client" "main" {
 
   # --- Auth flows ---
   explicit_auth_flows = [
-    "ALLOW_USER_PASSWORD_AUTH",    # email + password login
-    "ALLOW_REFRESH_TOKEN_AUTH",    # allow token refresh
-    "ALLOW_USER_SRP_AUTH"          # secure remote password (recommended)
+    "ALLOW_USER_PASSWORD_AUTH", # email + password login
+    "ALLOW_REFRESH_TOKEN_AUTH", # allow token refresh
+    "ALLOW_USER_SRP_AUTH"       # secure remote password (recommended)
   ]
 
   # --- Security ---
-  prevent_user_existence_errors = "ENABLED"  # hides if user exists or not
+  prevent_user_existence_errors = "ENABLED" # hides if user exists or not
 
-  generate_secret = false    # true if server-side app, false for frontend/mobile
+  generate_secret = false # true if server-side app, false for frontend/mobile
 }
 
 
@@ -122,8 +122,8 @@ resource "aws_cognito_user" "admin" {
   temporary_password = "Autopro@2025!"
 
   # --- Force user to change password on first login ---
-  message_action = "SUPPRESS"   # "SUPPRESS" = don't send welcome email
-                                # "RESEND"   = resend welcome email
+  message_action = "SUPPRESS" # "SUPPRESS" = don't send welcome email
+  # "RESEND"   = resend welcome email
 
 }
 

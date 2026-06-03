@@ -78,9 +78,22 @@ module "auth" {
 module "cache" {
   source = "./modules/cache"
 
-  name_prefix = local.name_prefix
+  name_prefix           = local.name_prefix
   private_db_subnet_ids = module.networking.private_db_subnet_ids
-  redis_sg_id =   module.security.redis_sg_id
-  redis_node_type = var.redis_node_type
+  redis_sg_id           = module.security.redis_sg_id
+  redis_node_type       = var.redis_node_type
 
+}
+
+
+module "frontend" {
+  source = "./modules/frontend"
+
+  providers = {
+    aws           = aws
+    aws.us_east_1 = aws.us_east_1
+  }
+
+  name_prefix  = local.name_prefix
+  alb_dns_name = module.compute.alb_dns_name
 }
