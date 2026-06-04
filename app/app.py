@@ -4,6 +4,7 @@ import time
 import logging
 import requests
 import redis
+import boto3
 from functools import wraps
 from flask import Flask, jsonify, request
 from jose import jwt, JWTError
@@ -30,6 +31,9 @@ COGNITO_USER_POOL_ID = os.environ["COGNITO_USER_POOL_ID"]
 COGNITO_CLIENT_ID    = os.environ["COGNITO_CLIENT_ID"]
 REDIS_HOST           = os.environ["REDIS_HOST"]
 REDIS_PORT           = 6379
+SQS_QUEUE_URL        = os.environ["SQS_QUEUE_URL"]
+
+sqs_client = boto3.client("sqs", region_name=AWS_REGION)
 
 COGNITO_KEYS_URL = (
     f"https://cognito-idp.{AWS_REGION}.amazonaws.com/"
@@ -225,6 +229,22 @@ def create_booking():
 
         cache.delete("admin:all_bookings")
         cache.delete(f"user:{request.user_id}:bookings")
+
+        try:
+            sqs_client.send_message(
+                QueueUrl    = SQS_QUEUE_URL,
+                MessageBody = json.dumps({
+                    "booking_id": booking_id,
+                    "user_email": request.user_email,
+                    "vehicle":    data["vehicle"],
+                    "service":    data["service"],
+                    "date":       data["date"],
+                    "time_slot":  data["time_slot"]
+                })
+            )
+            logger.info(f"Booking event queued for booking {booking_id}")
+        except Exception as e:
+            logger.error(f"Failed to queue booking event: {str(e)}")
 
         logger.info(f"Booking {booking_id} created for user {request.user_id}")
         return jsonify({"message": "Booking created successfully", "booking_id": booking_id}), 201

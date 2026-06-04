@@ -90,6 +90,8 @@ resource "aws_launch_template" "main" {
     redis_endpoint       = var.redis_endpoint
     cognito_user_pool_id = var.cognito_user_pool_id
     cognito_client_id    = var.cognito_client_id
+    sqs_queue_url        = var.sqs_queue_url
+    sns_topic_arn        = var.sns_topic_arn
   }))
 
 

@@ -68,3 +68,13 @@ variable "cognito_client_id" {
   description = "Cognito App Client ID - from auth module"
   type        = string
 }
+
+variable "sqs_queue_url" {
+  description = "SQS queue URL - Flask sends booking events here"
+  type        = string
+}
+
+variable "sns_topic_arn" {
+  description = "SNS topic ARN - worker publishes notifications here"
+  type        = string
+}

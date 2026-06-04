@@ -86,6 +86,8 @@ REDIS_HOST=${redis_endpoint}
 COGNITO_USER_POOL_ID=${cognito_user_pool_id}
 COGNITO_CLIENT_ID=${cognito_client_id}
 AWS_REGION=${region}
+SQS_QUEUE_URL=${sqs_queue_url}
+SNS_TOPIC_ARN=${sns_topic_arn}
 EOF
 chmod 600 /etc/autoserve/app.env
 
@@ -118,11 +120,41 @@ WantedBy=multi-user.target
 EOF
 
 # =============================================================================
-# STEP 8 — Start Flask
+# STEP 8 — Create worker systemd service
+# Runs alongside Flask — polls SQS and sends SNS email notifications
+# =============================================================================
+echo "=== Creating worker systemd service ==="
+cat > /etc/systemd/system/autoserve-worker.service << 'EOF'
+[Unit]
+Description=AutoServe Pro SQS Worker
+After=network.target
+
+[Service]
+Type=simple
+User=ec2-user
+WorkingDirectory=/home/ec2-user/app/app
+EnvironmentFile=/etc/autoserve/db.env
+EnvironmentFile=/etc/autoserve/app.env
+ExecStart=/home/ec2-user/venv/bin/python worker.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# =============================================================================
+# STEP 9 — Start Flask and Worker
 # =============================================================================
 echo "=== Starting AutoServe Flask application ==="
 systemctl daemon-reload
 systemctl enable autoserve
 systemctl start autoserve
+
+echo "=== Starting AutoServe worker ==="
+systemctl enable autoserve-worker
+systemctl start autoserve-worker
 
 echo "=== Startup complete ==="

@@ -60,6 +60,8 @@ module "compute" {
   redis_endpoint            = module.cache.redis_endpoint
   cognito_user_pool_id      = module.auth.user_pool_id
   cognito_client_id         = module.auth.user_pool_client_id
+  sns_topic_arn = module.messaging.sns_topic_arn
+  sqs_queue_url = module.messaging.sqs_queue_url
 }
 
 
@@ -97,3 +99,12 @@ module "frontend" {
   name_prefix  = local.name_prefix
   alb_dns_name = module.compute.alb_dns_name
 }
+
+
+module "messaging"{
+  source = "./modules/messaging"
+
+  name_prefix = local.name_prefix
+  admin_email = var.admin_email
+}
+
