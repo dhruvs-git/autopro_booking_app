@@ -17,3 +17,8 @@ output "dlq_arn" {
   description = "Dead letter queue ARN - messages land here after 3 failed attempts"
   value       = aws_sqs_queue.bookings_dlq.arn
 }
+
+output "dlq_name" {
+  description = "For cloudwatch metric"
+  value       = aws_sqs_queue.bookings_dlq.name
+}

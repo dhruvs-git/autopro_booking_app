@@ -5,19 +5,32 @@ import logging
 import requests
 import redis
 import boto3
+import watchtower
 from functools import wraps
 from flask import Flask, jsonify, request
 from jose import jwt, JWTError
 import mysql.connector
 
 # =============================================================================
-# LOGGING — Structured JSON
+# LOGGING — Structured JSON to stdout + CloudWatch Logs
 # =============================================================================
 logging.basicConfig(
     level=logging.INFO,
     format='{"time": "%(asctime)s", "level": "%(levelname)s", "message": "%(message)s"}'
 )
 logger = logging.getLogger(__name__)
+
+_project   = os.environ.get("PROJECT_NAME", "autoserve")
+_env       = os.environ.get("ENVIRONMENT", "dev")
+_region    = os.environ.get("AWS_REGION", "ca-central-1")
+
+try:
+    logger.addHandler(watchtower.CloudWatchLogHandler(
+        log_group=f"/{_project}-{_env}/flask",
+        boto3_client=boto3.client("logs", region_name=_region)
+    ))
+except Exception:
+    pass
 
 app = Flask(__name__)
 

@@ -7,3 +7,9 @@ output "asg_name" {
   description = "ASG name - used by GitHub Actions to trigger instance refresh"
   value       = aws_autoscaling_group.main.name
 }
+
+output "alb_arn_suffix" {
+  description = "ALB ARN suffix - used for CloudWatch metric dimensions"
+  value       = aws_lb.main.arn_suffix
+}
+

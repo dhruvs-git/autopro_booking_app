@@ -78,3 +78,13 @@ variable "sns_topic_arn" {
   description = "SNS topic ARN - worker publishes notifications here"
   type        = string
 }
+
+variable "project_name" {
+  description = "Project name - injected into EC2 environment for CloudWatch log group naming"
+  type        = string
+}
+
+variable "environment" {
+  description = "Environment - injected into EC2 environment for CloudWatch log group naming"
+  type        = string
+}

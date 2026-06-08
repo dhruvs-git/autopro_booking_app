@@ -88,6 +88,8 @@ COGNITO_CLIENT_ID=${cognito_client_id}
 AWS_REGION=${region}
 SQS_QUEUE_URL=${sqs_queue_url}
 SNS_TOPIC_ARN=${sns_topic_arn}
+PROJECT_NAME=${project_name}
+ENVIRONMENT=${environment}
 EOF
 chmod 600 /etc/autoserve/app.env
 

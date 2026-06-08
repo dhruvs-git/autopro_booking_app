@@ -3,7 +3,7 @@
 # Nothing is ever lost — failed messages wait here for investigation.
 resource "aws_sqs_queue" "bookings_dlq" {
   name                      = "${var.name_prefix}-bookings-dlq"
-  message_retention_seconds = 1209600   # 14 days (max)
+  message_retention_seconds = 1209600 # 14 days (max)
 
   tags = {
     Name = "${var.name_prefix}-bookings-dlq"
@@ -13,19 +13,19 @@ resource "aws_sqs_queue" "bookings_dlq" {
 # Main Queue
 resource "aws_sqs_queue" "booking_events" {
   name                       = "${var.name_prefix}-booking-events"
-  delay_seconds              = 0          # delay before message is visible
-  max_message_size           = 262144     # 256KB max
-  message_retention_seconds  = 86400     # 1 day
-  receive_wait_time_seconds  = 10        # long polling — wait up to 10s for messages
-  visibility_timeout_seconds = 30        # how long a message is hidden after received
+  delay_seconds              = 0      # delay before message is visible
+  max_message_size           = 262144 # 256KB max
+  message_retention_seconds  = 86400  # 1 day
+  receive_wait_time_seconds  = 10     # long polling — wait up to 10s for messages
+  visibility_timeout_seconds = 30     # how long a message is hidden after received
 
   # --- Dead Letter Queue config ---
   redrive_policy = jsonencode({
     deadLetterTargetArn = aws_sqs_queue.bookings_dlq.arn
-    maxReceiveCount     = 3    # after 3 failed attempts → goes to DLQ
+    maxReceiveCount     = 3 # after 3 failed attempts → goes to DLQ
   })
 
-  sqs_managed_sse_enabled = true   # encryption
+  sqs_managed_sse_enabled = true # encryption
 
   tags = {
     Name = "${var.name_prefix}-booking-events"
@@ -63,7 +63,7 @@ resource "aws_sqs_queue_policy" "booking_events" {
 
 # SNS Topic
 resource "aws_sns_topic" "booking_notifications" {
-  name = "${var.name_prefix}-booking-notifications"
+  name         = "${var.name_prefix}-booking-notifications"
   display_name = "My App Notifications"
 
   tags = {

@@ -60,8 +60,10 @@ module "compute" {
   redis_endpoint            = module.cache.redis_endpoint
   cognito_user_pool_id      = module.auth.user_pool_id
   cognito_client_id         = module.auth.user_pool_client_id
-  sns_topic_arn = module.messaging.sns_topic_arn
-  sqs_queue_url = module.messaging.sqs_queue_url
+  sns_topic_arn             = module.messaging.sns_topic_arn
+  sqs_queue_url             = module.messaging.sqs_queue_url
+  project_name              = var.project_name
+  environment               = var.environment
 }
 
 
@@ -101,10 +103,21 @@ module "frontend" {
 }
 
 
-module "messaging"{
+module "messaging" {
   source = "./modules/messaging"
 
   name_prefix = local.name_prefix
   admin_email = var.admin_email
 }
 
+
+module "monitoring" {
+  source                  = "./modules/monitoring"
+  name_prefix             = local.name_prefix
+  region                  = var.region
+  asg_name                = module.compute.asg_name
+  alb_arn_suffix          = module.compute.alb_arn_suffix
+  rds_instance_identifier = module.database.rds_instance_identifier
+  sns_topic_arn           = module.messaging.sns_topic_arn
+  dlq_name                = module.messaging.dlq_name
+}

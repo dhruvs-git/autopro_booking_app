@@ -92,6 +92,8 @@ resource "aws_launch_template" "main" {
     cognito_client_id    = var.cognito_client_id
     sqs_queue_url        = var.sqs_queue_url
     sns_topic_arn        = var.sns_topic_arn
+    project_name         = var.project_name
+    environment          = var.environment
   }))
 
 

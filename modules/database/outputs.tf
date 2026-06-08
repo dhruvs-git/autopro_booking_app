@@ -12,3 +12,8 @@ output "db_rds_endpoint" {
   description = "rds-endpoint for root output"
   value       = aws_db_instance.main.address
 }
+
+output "rds_instance_identifier" {
+  description = "RDS instance identifier — used for CloudWatch metric dimensions"
+  value       = aws_db_instance.main.id
+}
