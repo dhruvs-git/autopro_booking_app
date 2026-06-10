@@ -39,3 +39,8 @@ output "frontend_bucket_name" {
   description = "S3 bucket name — upload frontend files here"
   value       = module.frontend.frontend_bucket_name
 }
+
+output "asg_name" {
+  description = "ASG name — used by GitHub Actions to find EC2 instances for SSM deploy"
+  value       = module.compute.asg_name
+}
