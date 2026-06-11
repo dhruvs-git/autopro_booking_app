@@ -1,6 +1,5 @@
 provider "aws" {
-  region  = var.region
-  profile = "terralearn"
+  region = var.region
 
   default_tags {
     tags = local.common_tags
@@ -8,9 +7,8 @@ provider "aws" {
 }
 
 provider "aws" {
-  alias   = "us_east_1"
-  region  = "us-east-1"
-  profile = "terralearn"
+  alias  = "us_east_1"
+  region = "us-east-1"
 
   default_tags {
     tags = local.common_tags
