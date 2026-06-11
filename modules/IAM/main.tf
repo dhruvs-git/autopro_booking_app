@@ -118,6 +118,20 @@ data "aws_iam_policy_document" "ec2_permissions" {
     resources = ["*"]
   }
 
+  # --- Cognito ---
+  # Flask adds confirmed users to the "customers" group after email verification
+  statement {
+    sid    = "CognitoAdminAccess"
+    effect = "Allow"
+    actions = [
+      "cognito-idp:AdminAddUserToGroup",
+      "cognito-idp:AdminDeleteUser"
+    ]
+    resources = [
+      "arn:aws:cognito-idp:${var.region}:${var.aws_account_id}:userpool/*"
+    ]
+  }
+
   # --- SNS ---
   # Background worker publishes booking confirmation emails
   # Scoped to SNS topics named autoserve-dev-* only

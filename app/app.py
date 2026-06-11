@@ -325,13 +325,15 @@ def confirm_signup():
             ConfirmationCode=data["code"]
         )
 
-        cognito_client.admin_add_user_to_group(
-            UserPoolId=COGNITO_USER_POOL_ID,
-            Username=data["email"],
-            GroupName="customers"
-        )
-
-        logger.info(f"User confirmed and added to customers group: {data['email']}")
+        try:
+            cognito_client.admin_add_user_to_group(
+                UserPoolId=COGNITO_USER_POOL_ID,
+                Username=data["email"],
+                GroupName="customers"
+            )
+            logger.info(f"User confirmed and added to customers group: {data['email']}")
+        except Exception as e:
+            logger.error(f"Group assignment failed (user still confirmed): {str(e)}")
         return jsonify({"message": "Email verified. You can now sign in."}), 200
 
     except cognito_client.exceptions.CodeMismatchException:
@@ -585,6 +587,22 @@ def cancel_booking(booking_id):
     except Exception as e:
         logger.error(f"Cancel booking failed: {str(e)}")
         return jsonify({"error": "Internal server error"}), 500
+
+@api.route("/auth/account", methods=["DELETE"])
+@require_auth
+def delete_account():
+    try:
+        cognito_client.admin_delete_user(
+            UserPoolId=COGNITO_USER_POOL_ID,
+            Username=request.user_email
+        )
+        logger.info(f"Account deleted: {request.user_email}")
+        return jsonify({"message": "Account deleted successfully"}), 200
+
+    except Exception as e:
+        logger.error(f"Account deletion failed: {str(e)}")
+        return jsonify({"error": "Failed to delete account"}), 500
+
 
 app.register_blueprint(api)
 
