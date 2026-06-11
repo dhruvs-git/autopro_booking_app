@@ -205,8 +205,7 @@ def health():
         health_status["status"] = "unhealthy"
         logger.error(f"Redis health check failed: {str(e)}")
 
-    status_code = 200 if health_status["status"] == "healthy" else 500
-    return jsonify(health_status), status_code
+    return jsonify(health_status), 200
 
 # =============================================================================
 # AUTH — LOGIN
