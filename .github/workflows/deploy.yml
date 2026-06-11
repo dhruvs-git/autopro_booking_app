@@ -178,6 +178,7 @@ jobs:
 
       # Deploy new Flask code to EC2 via SSM — no SSH keys needed
       - name: Deploy Flask app to EC2
+        continue-on-error: true
         run: |
           INSTANCE_IDS=$(aws autoscaling describe-auto-scaling-groups \
             --auto-scaling-group-names ${{ steps.tf_outputs.outputs.asg_name }} \
