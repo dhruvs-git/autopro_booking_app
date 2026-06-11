@@ -17,7 +17,7 @@ echo "=== AutoServe Pro startup script beginning ==="
 # =============================================================================
 echo "=== Installing system dependencies ==="
 dnf update -y
-dnf install -y python3 python3-pip git
+dnf install -y python3 python3-pip git amazon-ssm-agent
 
 # =============================================================================
 # STEP 2 — Install and start SSM Agent
