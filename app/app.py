@@ -287,6 +287,31 @@ def signup():
 # Verifies email with the 6-digit code Cognito sent.
 # Adds user to the customers group after confirmed — so they can access /bookings.
 # =============================================================================
+@api.route("/auth/resend", methods=["POST"])
+def resend_confirmation():
+    try:
+        data = request.get_json()
+        if not data.get("email"):
+            return jsonify({"error": "Email required"}), 400
+
+        cognito_client.resend_confirmation_code(
+            ClientId=COGNITO_CLIENT_ID,
+            Username=data["email"]
+        )
+
+        return jsonify({"message": "A new verification code has been sent to your email."}), 200
+
+    except cognito_client.exceptions.UserNotFoundException:
+        return jsonify({"error": "No account found with this email"}), 404
+
+    except cognito_client.exceptions.InvalidParameterException:
+        return jsonify({"error": "Already confirmed — you can sign in"}), 400
+
+    except Exception as e:
+        logger.error(f"Resend confirmation failed: {str(e)}")
+        return jsonify({"error": "Failed to resend code"}), 500
+
+
 @api.route("/auth/confirm", methods=["POST"])
 def confirm_signup():
     try:

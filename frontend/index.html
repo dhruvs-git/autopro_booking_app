@@ -447,6 +447,7 @@
         <input type="text" id="confirmCode" placeholder="123456" maxlength="6" />
       </div>
       <button class="btn-primary" onclick="handleConfirm()">Verify Email →</button>
+      <button class="btn-ghost" onclick="handleResend()">Resend Code</button>
       <button class="btn-ghost" onclick="switchTab('login')">Back to Sign In</button>
     </div>
 
@@ -684,6 +685,37 @@ async function handleSignup() {
 // Submits the 6-digit code Cognito sent to the user's inbox.
 // On success: switches to login with a green success message.
 // =============================================================================
+async function handleResend() {
+  const email = document.getElementById('confirmEmail').value.trim();
+  if (!email) { showError('No email found — please sign up again'); return; }
+
+  try {
+    const response = await fetch(`${API_BASE}/auth/resend`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+
+    const data = await response.json();
+    const errEl = document.getElementById('authError');
+
+    if (!response.ok) {
+      showError(data.error || 'Failed to resend code');
+      return;
+    }
+
+    errEl.textContent      = '📧 New code sent — check your email.';
+    errEl.style.color      = '#10b981';
+    errEl.style.background = 'rgba(16,185,129,0.1)';
+    errEl.style.border     = '1px solid rgba(16,185,129,0.3)';
+    errEl.style.display    = 'block';
+    document.getElementById('confirmCode').value = '';
+
+  } catch (err) {
+    showError('Network error — please try again');
+  }
+}
+
 async function handleConfirm() {
   const email = document.getElementById('confirmEmail').value.trim();
   const code  = document.getElementById('confirmCode').value.trim();
