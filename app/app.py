@@ -7,7 +7,7 @@ import redis
 import boto3
 import watchtower
 from functools import wraps
-from flask import Flask, jsonify, request
+from flask import Flask, Blueprint, jsonify, request
 from jose import jwt, JWTError
 import mysql.connector
 
@@ -33,6 +33,7 @@ except Exception:
     pass
 
 app = Flask(__name__)
+api = Blueprint("api", __name__, url_prefix="/api")
 
 # =============================================================================
 # CONFIGURATION — All values from environment variables
@@ -46,7 +47,8 @@ REDIS_HOST           = os.environ["REDIS_HOST"]
 REDIS_PORT           = 6379
 SQS_QUEUE_URL        = os.environ["SQS_QUEUE_URL"]
 
-sqs_client = boto3.client("sqs", region_name=AWS_REGION)
+sqs_client     = boto3.client("sqs",         region_name=AWS_REGION)
+cognito_client = boto3.client("cognito-idp", region_name=AWS_REGION)
 
 COGNITO_KEYS_URL = (
     f"https://cognito-idp.{AWS_REGION}.amazonaws.com/"
@@ -179,7 +181,7 @@ def require_admin(f):
 
 # =============================================================================
 # HEALTH CHECK
-# ALB hits this every 30 seconds — no auth required.
+# ALB hits /health directly — must stay at root, NOT under /api blueprint.
 # Checks both DB and Redis so a failed Redis also marks the instance unhealthy.
 # =============================================================================
 @app.route("/health", methods=["GET"])
@@ -207,11 +209,126 @@ def health():
     return jsonify(health_status), status_code
 
 # =============================================================================
+# AUTH — LOGIN
+# POST /api/auth/login
+# =============================================================================
+@api.route("/auth/login", methods=["POST"])
+def login():
+    try:
+        data = request.get_json()
+        if not data.get("email") or not data.get("password"):
+            return jsonify({"error": "Email and password required"}), 400
+
+        response = cognito_client.initiate_auth(
+            AuthFlow="USER_PASSWORD_AUTH",
+            AuthParameters={
+                "USERNAME": data["email"],
+                "PASSWORD": data["password"]
+            },
+            ClientId=COGNITO_CLIENT_ID
+        )
+
+        tokens = response["AuthenticationResult"]
+        claims = validate_token(tokens["AccessToken"])
+        group  = claims.get("cognito:groups", ["customers"])[0] if claims else "customers"
+
+        return jsonify({
+            "access_token":  tokens["AccessToken"],
+            "id_token":      tokens["IdToken"],
+            "refresh_token": tokens["RefreshToken"],
+            "group":         group
+        }), 200
+
+    except cognito_client.exceptions.NotAuthorizedException:
+        return jsonify({"error": "Invalid email or password"}), 401
+
+    except cognito_client.exceptions.UserNotConfirmedException:
+        return jsonify({"error": "Please verify your email first"}), 401
+
+    except Exception as e:
+        logger.error(f"Login failed: {str(e)}")
+        return jsonify({"error": "Login failed"}), 500
+
+# =============================================================================
+# AUTH — SIGNUP
+# POST /api/auth/signup
+# Creates user in Cognito — sends verification email
+# User is added to customers group after they confirm (see /auth/confirm)
+# =============================================================================
+@api.route("/auth/signup", methods=["POST"])
+def signup():
+    try:
+        data = request.get_json()
+        if not data.get("email") or not data.get("password"):
+            return jsonify({"error": "Email and password required"}), 400
+
+        cognito_client.sign_up(
+            ClientId=COGNITO_CLIENT_ID,
+            Username=data["email"],
+            Password=data["password"],
+            UserAttributes=[{"Name": "email", "Value": data["email"]}]
+        )
+
+        logger.info(f"New user signed up: {data['email']}")
+        return jsonify({"message": "Account created. Check your email for a verification code."}), 201
+
+    except cognito_client.exceptions.UsernameExistsException:
+        return jsonify({"error": "Email already registered"}), 409
+
+    except cognito_client.exceptions.InvalidPasswordException as e:
+        return jsonify({"error": str(e)}), 400
+
+    except Exception as e:
+        logger.error(f"Signup failed: {str(e)}")
+        return jsonify({"error": "Signup failed"}), 500
+
+# =============================================================================
+# AUTH — CONFIRM
+# POST /api/auth/confirm
+# Verifies email with the 6-digit code Cognito sent.
+# Adds user to the customers group after confirmed — so they can access /bookings.
+# =============================================================================
+@api.route("/auth/confirm", methods=["POST"])
+def confirm_signup():
+    try:
+        data = request.get_json()
+        if not data.get("email") or not data.get("code"):
+            return jsonify({"error": "Email and code required"}), 400
+
+        cognito_client.confirm_sign_up(
+            ClientId=COGNITO_CLIENT_ID,
+            Username=data["email"],
+            ConfirmationCode=data["code"]
+        )
+
+        cognito_client.admin_add_user_to_group(
+            UserPoolId=COGNITO_USER_POOL_ID,
+            Username=data["email"],
+            GroupName="customers"
+        )
+
+        logger.info(f"User confirmed and added to customers group: {data['email']}")
+        return jsonify({"message": "Email verified. You can now sign in."}), 200
+
+    except cognito_client.exceptions.CodeMismatchException:
+        return jsonify({"error": "Invalid verification code"}), 400
+
+    except cognito_client.exceptions.ExpiredCodeException:
+        return jsonify({"error": "Code expired — sign up again to get a new one"}), 400
+
+    except cognito_client.exceptions.NotAuthorizedException:
+        return jsonify({"error": "Already confirmed — you can sign in"}), 400
+
+    except Exception as e:
+        logger.error(f"Confirm signup failed: {str(e)}")
+        return jsonify({"error": "Verification failed"}), 500
+
+# =============================================================================
 # CREATE BOOKING
-# POST /bookings — any authenticated user
+# POST /api/bookings — any authenticated user
 # user_id always from JWT sub — never from request body
 # =============================================================================
-@app.route("/bookings", methods=["POST"])
+@api.route("/bookings", methods=["POST"])
 @require_auth
 def create_booking():
     try:
@@ -268,9 +385,9 @@ def create_booking():
 
 # =============================================================================
 # GET BOOKINGS
-# GET /bookings — customers see only their own, cached per user
+# GET /api/bookings — customers see only their own, cached per user
 # =============================================================================
-@app.route("/bookings", methods=["GET"])
+@api.route("/bookings", methods=["GET"])
 @require_auth
 def get_bookings():
     try:
@@ -307,9 +424,9 @@ def get_bookings():
 
 # =============================================================================
 # GET SINGLE BOOKING
-# GET /bookings/<id> — customer can only see their own booking
+# GET /api/bookings/<id> — customer can only see their own booking
 # =============================================================================
-@app.route("/bookings/<int:booking_id>", methods=["GET"])
+@api.route("/bookings/<int:booking_id>", methods=["GET"])
 @require_auth
 def get_booking(booking_id):
     try:
@@ -340,9 +457,9 @@ def get_booking(booking_id):
 
 # =============================================================================
 # ADMIN — GET ALL BOOKINGS
-# GET /admin/bookings — admins only, cached separately
+# GET /api/admin/bookings — admins only, cached separately
 # =============================================================================
-@app.route("/admin/bookings", methods=["GET"])
+@api.route("/admin/bookings", methods=["GET"])
 @require_admin
 def admin_get_all_bookings():
     try:
@@ -368,7 +485,7 @@ def admin_get_all_bookings():
 
         cache.setex(cache_key, 60, json.dumps(bookings))
         logger.info("Cache miss for admin:all_bookings — fetched from RDS")
-        return jsonify({"bookings": bookings, "source": "database"}), 200
+        return jsonify({"bookings": bookings, "source": "cache"}), 200
 
     except Exception as e:
         logger.error(f"Admin get bookings failed: {str(e)}")
@@ -376,9 +493,9 @@ def admin_get_all_bookings():
 
 # =============================================================================
 # ADMIN — UPDATE BOOKING STATUS
-# PUT /admin/bookings/<id>/status — admins only
+# PUT /api/admin/bookings/<id>/status — admins only
 # =============================================================================
-@app.route("/admin/bookings/<int:booking_id>/status", methods=["PUT"])
+@api.route("/admin/bookings/<int:booking_id>/status", methods=["PUT"])
 @require_admin
 def update_booking_status(booking_id):
     try:
@@ -413,9 +530,9 @@ def update_booking_status(booking_id):
 
 # =============================================================================
 # CANCEL BOOKING
-# DELETE /bookings/<id> — customer can only cancel their own booking
+# DELETE /api/bookings/<id> — customer can only cancel their own booking
 # =============================================================================
-@app.route("/bookings/<int:booking_id>", methods=["DELETE"])
+@api.route("/bookings/<int:booking_id>", methods=["DELETE"])
 @require_auth
 def cancel_booking(booking_id):
     try:
@@ -444,6 +561,8 @@ def cancel_booking(booking_id):
     except Exception as e:
         logger.error(f"Cancel booking failed: {str(e)}")
         return jsonify({"error": "Internal server error"}), 500
+
+app.register_blueprint(api)
 
 # =============================================================================
 # ENTRY POINT

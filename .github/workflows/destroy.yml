@@ -1,0 +1,61 @@
+name: AutoServe Pro — Destroy Infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "destroy" to confirm you want to tear down all infrastructure'
+        required: true
+
+env:
+  AWS_REGION: ca-central-1
+  TF_VERSION: 1.14.6
+
+jobs:
+  terraform-destroy:
+    name: Terraform Destroy
+    runs-on: ubuntu-latest
+
+    # Hard stop — if the user didn't type "destroy" exactly, the job never runs
+    if: github.event.inputs.confirm == 'destroy'
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform Init
+        run: terraform init
+
+      # Empty the frontend S3 bucket first — terraform destroy fails on non-empty buckets
+      - name: Empty frontend S3 bucket
+        run: |
+          BUCKET=$(terraform output -raw frontend_bucket_name 2>/dev/null || echo "")
+          if [ -n "$BUCKET" ]; then
+            echo "Emptying bucket: $BUCKET"
+            aws s3 rm s3://$BUCKET --recursive --region ${{ env.AWS_REGION }}
+          else
+            echo "No frontend bucket found — skipping"
+          fi
+
+      # Clean up saved tfplan files from state bucket
+      - name: Clean up saved plans from S3
+        run: |
+          aws s3 rm s3://autoserve-app-terraform-state/plans/ --recursive --region ${{ env.AWS_REGION }} || true
+
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve
