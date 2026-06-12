@@ -1,934 +1,1071 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AutoServe Pro</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoServe Pro — Vehicle Service Booking</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #0d0f14;
-      color: #f0ede8;
-      min-height: 100vh;
+    :root {
+      --bg:       #0f172a;
+      --s1:       #1e293b;
+      --s2:       #273349;
+      --border:   #334155;
+      --primary:  #f59e0b;
+      --ph:       #d97706;
+      --pglow:    rgba(245,158,11,0.11);
+      --text:     #f1f5f9;
+      --muted:    #94a3b8;
+      --faint:    #64748b;
+      --green:    #10b981;
+      --blue:     #3b82f6;
+      --purple:   #8b5cf6;
+      --red:      #ef4444;
+      --r:        12px;
+      --rs:       8px;
     }
 
-    /* =========================================================
-       NAVBAR
-    ========================================================= */
-    nav {
-      background: #13151d;
-      border-bottom: 1px solid #252836;
-      padding: 14px 32px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    html, body { height: 100%; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg); color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+    /* ============================================================
+       AUTH PAGE
+    ============================================================ */
+    #authPage { min-height: 100vh; display: flex; }
+
+    .auth-left {
+      flex: 1.1;
+      background: linear-gradient(145deg, #090f1e 0%, #101828 50%, #0f172a 100%);
+      padding: 56px 60px;
+      display: none; flex-direction: column; justify-content: space-between;
+      position: relative; overflow: hidden;
+    }
+    .auth-left::before {
+      content: ''; position: absolute;
+      width: 480px; height: 480px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(245,158,11,0.07) 0%, transparent 65%);
+      bottom: -80px; right: -100px; pointer-events: none;
+    }
+    @media (min-width: 960px) { .auth-left { display: flex; } }
+
+    .al-logo { display: flex; align-items: center; gap: 12px; }
+    .al-logo-box {
+      width: 42px; height: 42px; background: var(--primary);
+      border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px;
+    }
+    .al-logo-name { font-size: 19px; font-weight: 700; letter-spacing: -0.3px; }
+    .al-logo-name em { font-style: normal; color: var(--primary); }
+
+    .al-hero h2 {
+      font-size: 40px; font-weight: 800; letter-spacing: -1.2px; line-height: 1.1;
+      margin-bottom: 16px;
+    }
+    .al-hero p { font-size: 15px; color: var(--muted); line-height: 1.65; max-width: 360px; margin-bottom: 36px; }
+
+    .al-features { display: flex; flex-direction: column; gap: 13px; }
+    .al-feat { display: flex; align-items: center; gap: 11px; font-size: 14px; color: var(--muted); }
+    .al-feat-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--primary); flex-shrink: 0; }
+
+    .al-footer { font-size: 12px; color: var(--faint); }
+
+    /* Auth right */
+    .auth-right { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 28px; }
+    .auth-card  { width: 100%; max-width: 400px; }
+
+    .auth-mob-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 30px; }
+    .auth-mob-logo-box {
+      width: 34px; height: 34px; background: var(--primary);
+      border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 17px;
+    }
+    .auth-mob-logo-text { font-size: 16px; font-weight: 700; }
+    .auth-mob-logo-text em { font-style: normal; color: var(--primary); }
+    @media (min-width: 960px) { .auth-mob-logo { display: none; } }
+
+    .auth-title    { font-size: 25px; font-weight: 700; letter-spacing: -0.4px; margin-bottom: 4px; }
+    .auth-subtitle { font-size: 13px; color: var(--muted); margin-bottom: 22px; }
+
+    .auth-tabs {
+      display: flex; background: var(--s1);
+      border-radius: var(--rs); padding: 4px; gap: 4px; margin-bottom: 22px;
+    }
+    .auth-tab {
+      flex: 1; padding: 9px; border: none; background: transparent;
+      color: var(--muted); font-size: 13px; font-weight: 500;
+      cursor: pointer; border-radius: 6px; transition: all 0.15s; font-family: inherit;
+    }
+    .auth-tab.active { background: var(--s2); color: var(--text); }
+
+    .auth-form { display: flex; flex-direction: column; gap: 14px; }
+    .afield { display: flex; flex-direction: column; gap: 5px; }
+    .afield label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+    .afield input {
+      padding: 11px 13px;
+      background: var(--s1); border: 1px solid var(--border);
+      border-radius: var(--rs); color: var(--text); font-size: 14px; font-family: inherit;
+      transition: border-color 0.15s; outline: none;
+    }
+    .afield input:focus { border-color: var(--primary); }
+    .afield input::placeholder { color: var(--faint); }
+    .afield input[readonly] { opacity: 0.55; cursor: default; }
+
+    .btn-primary {
+      padding: 12px 18px; background: var(--primary); color: #000;
+      border: none; border-radius: var(--rs); font-size: 14px; font-weight: 600;
+      cursor: pointer; font-family: inherit; transition: background 0.15s, transform 0.1s;
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+    }
+    .btn-primary:hover  { background: var(--ph); }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    .btn-ghost {
+      padding: 10px 14px; background: transparent; color: var(--muted);
+      border: 1px solid var(--border); border-radius: var(--rs);
+      font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all 0.15s;
+    }
+    .btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
+
+    .auth-error {
+      padding: 11px 13px; background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.28); border-radius: var(--rs);
+      color: #ef4444; font-size: 13px; display: none;
+    }
+    .auth-success {
+      padding: 11px 13px; background: rgba(16,185,129,0.1);
+      border: 1px solid rgba(16,185,129,0.28); border-radius: var(--rs);
+      color: #10b981; font-size: 13px; display: none;
+    }
+
+    .confirm-env {
+      width: 50px; height: 50px; background: rgba(245,158,11,0.1); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; font-size: 22px; margin: 0 auto 14px;
+    }
+    .confirm-desc { font-size: 13px; color: var(--muted); text-align: center; margin-bottom: 4px; line-height: 1.55; }
+    .form-stack   { display: flex; flex-direction: column; gap: 8px; }
+    .powered      { font-size: 12px; color: var(--faint); text-align: center; }
+
+    /* ============================================================
+       APP SCREEN
+    ============================================================ */
+    #appScreen { display: none; min-height: 100vh; }
+
+    .topnav {
+      position: sticky; top: 0; z-index: 100; height: 60px;
+      background: rgba(15,23,42,0.97); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 20px; gap: 20px;
     }
 
     .nav-brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 700;
-      font-size: 16px;
+      display: flex; align-items: center; gap: 9px;
+      font-size: 15px; font-weight: 700; letter-spacing: -0.3px; flex-shrink: 0;
+    }
+    .nav-brand-box {
+      width: 30px; height: 30px; background: var(--primary); border-radius: 7px;
+      display: flex; align-items: center; justify-content: center; font-size: 15px;
+    }
+    .nav-brand em { font-style: normal; color: var(--primary); }
+
+    .nav-tabs { display: flex; gap: 2px; flex: 1; }
+    .nav-tab {
+      padding: 7px 13px; border: none; background: transparent;
+      color: var(--muted); font-size: 13px; font-weight: 500;
+      cursor: pointer; border-radius: var(--rs); transition: all 0.15s; font-family: inherit;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .nav-tab:hover  { background: var(--s1); color: var(--text); }
+    .nav-tab.active { background: var(--pglow); color: var(--primary); }
+    .nav-tab.hidden { display: none; }
+
+    .nav-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+    .badge-admin {
+      padding: 2px 9px; background: rgba(245,158,11,0.13);
+      border: 1px solid rgba(245,158,11,0.3); border-radius: 20px;
+      font-size: 10px; font-weight: 700; color: var(--primary);
+      text-transform: uppercase; letter-spacing: 0.8px; display: none;
     }
 
-    .nav-brand-icon {
-      width: 32px;
-      height: 32px;
-      background: #f59e0b;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
+    .nav-email {
+      font-size: 12px; color: var(--muted);
+      max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
 
-    .nav-user {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 13px;
-      color: #9ca3af;
+    .btn-signout {
+      padding: 6px 12px; background: transparent; color: var(--muted);
+      border: 1px solid var(--border); border-radius: var(--rs);
+      font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all 0.15s;
     }
+    .btn-signout:hover { border-color: var(--red); color: var(--red); }
 
-    .btn-logout {
-      padding: 6px 14px;
-      background: transparent;
-      border: 1px solid #252836;
-      border-radius: 6px;
-      color: #9ca3af;
-      cursor: pointer;
-      font-size: 13px;
+    /* Pages */
+    .page { display: none; padding: 28px 20px; max-width: 1200px; margin: 0 auto; }
+    .page.active { display: block; }
+
+    .page-head { margin-bottom: 24px; }
+    .page-head h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.4px; margin-bottom: 3px; }
+    .page-head p  { font-size: 13px; color: var(--muted); }
+
+    /* Admin banner */
+    .admin-banner {
+      background: linear-gradient(135deg, rgba(245,158,11,0.09) 0%, transparent 100%);
+      border: 1px solid rgba(245,158,11,0.2); border-radius: var(--r);
+      padding: 16px 20px; margin-bottom: 22px;
+      display: none; align-items: center; gap: 14px;
     }
+    .admin-banner.show { display: flex; }
+    .admin-banner-icon { font-size: 24px; }
+    .admin-banner h3 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .admin-banner p  { font-size: 12px; color: var(--muted); }
 
-    .btn-logout:hover { border-color: #f59e0b; color: #f59e0b; }
-
-    /* =========================================================
-       AUTH SCREEN
-    ========================================================= */
-    .auth-screen {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 20px;
+    /* Stats */
+    .stats-row {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+      gap: 14px; margin-bottom: 26px;
     }
-
-    .auth-card {
-      background: #1a1d27;
-      border: 1px solid #252836;
-      border-radius: 14px;
-      padding: 36px;
-      width: 100%;
-      max-width: 400px;
-    }
-
-    .auth-header {
-      text-align: center;
-      margin-bottom: 28px;
-    }
-
-    .auth-icon {
-      width: 48px;
-      height: 48px;
-      background: rgba(245,158,11,0.15);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      margin: 0 auto 14px;
-    }
-
-    .auth-header h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
-    .auth-header p { font-size: 13px; color: #9ca3af; }
-
-    .tabs {
-      display: flex;
-      background: #13151d;
-      border-radius: 8px;
-      padding: 3px;
-      margin-bottom: 24px;
-    }
-
-    .tab {
-      flex: 1;
-      padding: 8px;
-      text-align: center;
-      font-size: 13px;
-      border-radius: 6px;
-      cursor: pointer;
-      border: none;
-      background: transparent;
-      color: #9ca3af;
-    }
-
-    .tab.active { background: #f59e0b; color: #000; font-weight: 700; }
-
-    .form-group { margin-bottom: 16px; }
-
-    label {
-      display: block;
-      font-size: 11px;
-      color: #9ca3af;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 6px;
-    }
-
-    input {
-      width: 100%;
-      padding: 10px 14px;
-      background: #13151d;
-      border: 1px solid #252836;
-      border-radius: 8px;
-      color: #f0ede8;
-      font-size: 14px;
-    }
-
-    input:focus { outline: none; border-color: #f59e0b; }
-    input[readonly] { opacity: 0.6; cursor: default; }
-
-    .btn-primary {
-      width: 100%;
-      padding: 12px;
-      background: #f59e0b;
-      border: none;
-      border-radius: 8px;
-      color: #000;
-      font-weight: 700;
-      font-size: 14px;
-      cursor: pointer;
-      margin-top: 8px;
-    }
-
-    .btn-primary:hover { background: #d97706; }
-
-    .btn-ghost {
-      width: 100%;
-      padding: 10px;
-      background: transparent;
-      border: none;
-      color: #9ca3af;
-      cursor: pointer;
-      font-size: 13px;
-      margin-top: 8px;
-    }
-
-    .btn-ghost:hover { color: #f0ede8; }
-
-    .powered-by {
-      text-align: center;
-      margin-top: 16px;
-      font-size: 12px;
-      color: #6b7280;
-    }
-
-    .error-msg {
-      background: rgba(239,68,68,0.1);
-      border: 1px solid rgba(239,68,68,0.3);
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-size: 13px;
-      color: #ef4444;
-      margin-bottom: 16px;
-      display: none;
-    }
-
-    .confirm-hint {
-      font-size: 13px;
-      color: #9ca3af;
-      margin-bottom: 20px;
-      line-height: 1.5;
-    }
-
-    /* =========================================================
-       MAIN APP
-    ========================================================= */
-    .app-screen { display: none; }
-
-    .container { max-width: 1100px; margin: 0 auto; padding: 32px 20px; }
-
-    /* =========================================================
-       TABS
-    ========================================================= */
-    .page-tabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 28px;
-    }
-
-    .page-tab {
-      padding: 8px 18px;
-      border-radius: 8px;
-      border: 1px solid #252836;
-      background: transparent;
-      color: #9ca3af;
-      font-size: 13px;
-      cursor: pointer;
-    }
-
-    .page-tab.active {
-      background: rgba(245,158,11,0.12);
-      border-color: #f59e0b;
-      color: #f59e0b;
-      font-weight: 600;
-    }
-
-    /* =========================================================
-       BOOKING FORM
-    ========================================================= */
-    .booking-card {
-      background: #1a1d27;
-      border: 1px solid #252836;
-      border-radius: 12px;
-      padding: 28px;
-      max-width: 520px;
-    }
-
-    .booking-card h2 { font-size: 18px; font-weight: 600; margin-bottom: 24px; }
-
-    .services-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .service-item {
-      padding: 12px 14px;
-      border-radius: 8px;
-      border: 1.5px solid #252836;
-      cursor: pointer;
-      background: #13151d;
-    }
-
-    .service-item:hover { border-color: #f59e0b; }
-    .service-item.selected {
-      border-color: #f59e0b;
-      background: rgba(245,158,11,0.1);
-    }
-
-    .service-name { font-size: 13px; font-weight: 500; margin-top: 4px; }
-    .service-price { font-size: 12px; color: #9ca3af; }
-
-    .slots-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-bottom: 20px;
-    }
-
-    .slot {
-      padding: 9px;
-      text-align: center;
-      border-radius: 7px;
-      border: 1.5px solid #252836;
-      cursor: pointer;
-      font-size: 13px;
-      background: #13151d;
-    }
-
-    .slot:hover { border-color: #f59e0b; }
-    .slot.selected { border-color: #f59e0b; background: rgba(245,158,11,0.1); color: #f59e0b; }
-
-    .success-msg {
-      background: rgba(16,185,129,0.1);
-      border: 1px solid rgba(16,185,129,0.3);
-      border-radius: 8px;
-      padding: 12px 16px;
-      font-size: 13px;
-      color: #10b981;
-      margin-bottom: 16px;
-      display: none;
-    }
-
-    /* =========================================================
-       DASHBOARD
-    ========================================================= */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-
     .stat-card {
-      background: #1a1d27;
-      border: 1px solid #252836;
-      border-radius: 10px;
-      padding: 16px;
+      background: var(--s1); border: 1px solid var(--border); border-radius: var(--r);
+      padding: 18px 20px; display: flex; align-items: center; gap: 14px;
+      transition: border-color 0.15s;
     }
-
-    .stat-label {
-      font-size: 11px;
-      color: #6b7280;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 8px;
+    .stat-card:hover { border-color: rgba(245,158,11,0.3); }
+    .stat-icon {
+      width: 42px; height: 42px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;
     }
+    .stat-num { font-size: 26px; font-weight: 700; line-height: 1; margin-bottom: 3px; }
+    .stat-lbl { font-size: 11px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
 
-    .stat-value { font-size: 24px; font-weight: 700; }
-    .stat-sub { font-size: 12px; color: #f59e0b; margin-top: 4px; }
-
-    .bookings-table {
-      background: #1a1d27;
-      border: 1px solid #252836;
-      border-radius: 12px;
-      overflow: hidden;
+    /* Section cards */
+    .section { background: var(--s1); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; margin-bottom: 20px; }
+    .section-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 15px 20px; border-bottom: 1px solid var(--border);
     }
+    .section-head h3 { font-size: 14px; font-weight: 600; }
+    .src-tag { font-size: 11px; color: var(--faint); }
 
-    .table-header {
-      padding: 14px 20px;
-      border-bottom: 1px solid #252836;
-      font-weight: 600;
-      font-size: 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .table-header span { font-size: 12px; color: #6b7280; font-weight: 400; }
-
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-
+    /* Table */
+    .tbl-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
     th {
-      padding: 10px 16px;
-      text-align: left;
-      color: #6b7280;
-      font-weight: 500;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-      background: #13151d;
+      padding: 10px 16px; font-size: 10px; font-weight: 600; color: var(--faint);
+      text-align: left; text-transform: uppercase; letter-spacing: 0.6px;
+      border-bottom: 1px solid var(--border); white-space: nowrap;
     }
+    td {
+      padding: 13px 16px; font-size: 13px;
+      border-bottom: 1px solid rgba(51,65,85,0.4); white-space: nowrap;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,0.012); }
 
-    td { padding: 12px 16px; border-top: 1px solid #252836; }
+    .bid { color: var(--primary); font-weight: 600; font-family: monospace; font-size: 12px; }
 
+    /* Badges */
     .badge {
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 600;
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600;
+    }
+    .badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; }
+    .badge-pending     { background: rgba(245,158,11,0.15); color: #f59e0b; }
+    .badge-pending::before     { background: #f59e0b; }
+    .badge-confirmed   { background: rgba(59,130,246,0.15);  color: #3b82f6; }
+    .badge-confirmed::before   { background: #3b82f6; }
+    .badge-in_progress { background: rgba(139,92,246,0.15); color: #8b5cf6; }
+    .badge-in_progress::before { background: #8b5cf6; }
+    .badge-completed   { background: rgba(16,185,129,0.15);  color: #10b981; }
+    .badge-completed::before   { background: #10b981; }
+    .badge-cancelled   { background: rgba(239,68,68,0.12);   color: #ef4444; }
+    .badge-cancelled::before   { background: #ef4444; }
+
+    .status-sel {
+      padding: 5px 8px; background: var(--s2);
+      border: 1px solid var(--border); border-radius: 6px;
+      color: var(--muted); font-size: 11px; font-family: inherit;
+      cursor: pointer; outline: none; transition: border-color 0.15s;
+    }
+    .status-sel:hover { border-color: var(--primary); }
+
+    /* Empty / loading */
+    .empty { padding: 52px 20px; text-align: center; }
+    .empty-icon { font-size: 34px; opacity: 0.28; margin-bottom: 12px; }
+    .empty h4 { font-size: 14px; color: var(--muted); margin-bottom: 5px; }
+    .empty p  { font-size: 12px; color: var(--faint); }
+
+    .spinner {
+      display: inline-block; width: 18px; height: 18px;
+      border: 2px solid var(--border); border-top-color: var(--primary);
+      border-radius: 50%; animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* CTA book */
+    .cta-book {
+      background: linear-gradient(135deg, rgba(245,158,11,0.09) 0%, rgba(245,158,11,0.03) 100%);
+      border: 1px solid rgba(245,158,11,0.2); border-radius: var(--r);
+      padding: 18px 22px; display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; transition: border-color 0.15s; margin-bottom: 22px;
+    }
+    .cta-book:hover { border-color: rgba(245,158,11,0.4); }
+    .cta-left h3 { font-size: 16px; font-weight: 700; margin-bottom: 3px; }
+    .cta-left p  { font-size: 12px; color: var(--muted); }
+    .cta-arrow {
+      width: 36px; height: 36px; background: var(--primary); border-radius: 9px;
+      display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0;
     }
 
-    .badge-confirmed    { background: rgba(16,185,129,0.15);  color: #10b981; }
-    .badge-pending      { background: rgba(245,158,11,0.15);  color: #f59e0b; }
-    .badge-in_progress  { background: rgba(59,130,246,0.15);  color: #3b82f6; }
-    .badge-cancelled    { background: rgba(239,68,68,0.15);   color: #ef4444; }
-    .badge-completed    { background: rgba(139,92,246,0.15);  color: #8b5cf6; }
+    /* Book Service */
+    .book-layout {
+      display: grid; grid-template-columns: 1fr 330px; gap: 20px; align-items: start;
+    }
+    @media (max-width: 860px) { .book-layout { grid-template-columns: 1fr; } }
 
-    .empty-state {
-      text-align: center;
-      padding: 48px 20px;
-      color: #6b7280;
+    .svc-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    }
+    @media (max-width: 560px) { .svc-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .svc-card {
+      background: var(--s1); border: 2px solid var(--border); border-radius: var(--r);
+      padding: 18px 12px; cursor: pointer; transition: all 0.15s; text-align: center;
+    }
+    .svc-card:hover { border-color: rgba(245,158,11,0.4); background: var(--s2); }
+    .svc-card.sel   { border-color: var(--primary); background: var(--pglow); }
+    .svc-icon  { font-size: 26px; margin-bottom: 8px; display: block; }
+    .svc-name  { font-size: 12px; font-weight: 600; margin-bottom: 2px; }
+    .svc-meta  { font-size: 11px; color: var(--faint); }
+
+    .book-panel {
+      background: var(--s1); border: 1px solid var(--border); border-radius: var(--r);
+      padding: 20px; position: sticky; top: 80px;
+    }
+    .bsum {
+      background: var(--pglow); border: 1px solid rgba(245,158,11,0.18);
+      border-radius: var(--rs); padding: 13px 15px; margin-bottom: 18px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .bsum-icon { font-size: 18px; }
+    .bsum-svc  { font-size: 13px; font-weight: 600; color: var(--primary); margin-bottom: 2px; }
+    .bsum-sub  { font-size: 11px; color: var(--faint); }
+
+    .plabel { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .psec   { margin-bottom: 16px; }
+
+    .pinput {
+      width: 100%; padding: 10px 12px;
+      background: var(--s2); border: 1px solid var(--border); border-radius: var(--rs);
+      color: var(--text); font-size: 13px; font-family: inherit; outline: none; transition: border-color 0.15s;
+      color-scheme: dark;
+    }
+    .pinput:focus { border-color: var(--primary); }
+    .pinput::placeholder { color: var(--faint); }
+
+    .slots-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .slot {
+      padding: 8px 4px; text-align: center; font-size: 11px; font-weight: 500;
+      background: var(--s2); border: 1px solid var(--border); border-radius: 6px;
+      cursor: pointer; color: var(--muted); transition: all 0.15s; font-family: inherit;
+    }
+    .slot:hover { border-color: rgba(245,158,11,0.4); color: var(--text); }
+    .slot.sel   { border-color: var(--primary); background: var(--pglow); color: var(--primary); }
+
+    .book-success {
+      padding: 12px; background: rgba(16,185,129,0.1);
+      border: 1px solid rgba(16,185,129,0.28); border-radius: var(--rs);
+      color: var(--green); font-size: 12px; display: none; text-align: center; margin-bottom: 10px;
+    }
+    .book-error {
+      padding: 10px 12px; background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.28); border-radius: var(--rs);
+      color: var(--red); font-size: 12px; display: none; margin-bottom: 10px;
     }
 
-    .loading { text-align: center; padding: 32px; color: #6b7280; }
+    /* Search */
+    .search-box {
+      padding: 7px 12px; background: var(--s2);
+      border: 1px solid var(--border); border-radius: var(--rs);
+      color: var(--text); font-size: 12px; font-family: inherit;
+      outline: none; width: 210px; transition: border-color 0.15s;
+    }
+    .search-box:focus { border-color: var(--primary); }
+    .search-box::placeholder { color: var(--faint); }
+
+    /* Toast */
+    #toast {
+      position: fixed; bottom: 18px; right: 18px; z-index: 9999;
+      background: var(--s1); border: 1px solid var(--border); border-radius: var(--rs);
+      padding: 12px 16px; font-size: 13px; display: flex; align-items: center; gap: 10px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.45);
+      transform: translateY(60px); opacity: 0;
+      transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1); max-width: 300px;
+    }
+    #toast.show   { transform: translateY(0); opacity: 1; }
+    #toast.t-ok   { border-left: 3px solid var(--green); }
+    #toast.t-err  { border-left: 3px solid var(--red); }
+    #toast.t-info { border-left: 3px solid var(--blue); }
   </style>
 </head>
 <body>
 
-<!-- =========================================================
-     AUTH SCREEN
-========================================================= -->
-<div class="auth-screen" id="authScreen">
-  <div class="auth-card">
-    <div class="auth-header">
-      <div class="auth-icon">🔧</div>
-      <h1>AutoServe Pro</h1>
-      <p>Vehicle Service Booking System</p>
+<!-- ============================================================
+     AUTH PAGE
+============================================================ -->
+<div id="authPage">
+  <div class="auth-left">
+    <div class="al-logo">
+      <div class="al-logo-box">🔧</div>
+      <div class="al-logo-name">AutoServe <em>Pro</em></div>
     </div>
-
-    <div class="tabs">
-      <button id="tabLogin"  class="tab active" onclick="switchTab('login')">Sign In</button>
-      <button id="tabSignup" class="tab"         onclick="switchTab('signup')">Sign Up</button>
+    <div class="al-hero">
+      <h2>Professional<br>Vehicle Service<br>Booking</h2>
+      <p>Book oil changes, tire rotations, brake inspections and more — all in one place. Trusted by thousands of drivers.</p>
+      <div class="al-features">
+        <div class="al-feat"><div class="al-feat-dot"></div>Instant booking confirmation</div>
+        <div class="al-feat"><div class="al-feat-dot"></div>Email notifications on every update</div>
+        <div class="al-feat"><div class="al-feat-dot"></div>Full service history in your dashboard</div>
+        <div class="al-feat"><div class="al-feat-dot"></div>Secured by AWS Cognito</div>
+      </div>
     </div>
+    <div class="al-footer">© 2026 AutoServe Pro. All rights reserved.</div>
+  </div>
 
-    <div id="authError" class="error-msg"></div>
+  <div class="auth-right">
+    <div class="auth-card">
+      <div class="auth-mob-logo">
+        <div class="auth-mob-logo-box">🔧</div>
+        <div class="auth-mob-logo-text">AutoServe <em>Pro</em></div>
+      </div>
 
-    <!-- Login Form -->
-    <div id="loginForm">
-      <div class="form-group">
-        <label>Email</label>
-        <input type="email" id="loginEmail" placeholder="you@example.com" />
+      <h1 class="auth-title"    id="authTitle">Welcome back</h1>
+      <p  class="auth-subtitle" id="authSub">Sign in to manage your service bookings</p>
+
+      <div class="auth-tabs" id="authTabs">
+        <button id="tabLogin"  class="auth-tab active" onclick="switchAuthTab('login')">Sign In</button>
+        <button id="tabSignup" class="auth-tab"        onclick="switchAuthTab('signup')">Sign Up</button>
       </div>
-      <div class="form-group">
-        <label>Password</label>
-        <input type="password" id="loginPassword" placeholder="••••••••" />
+
+      <div id="authError"   class="auth-error"></div>
+      <div id="authSuccess" class="auth-success"></div>
+
+      <!-- Login -->
+      <div id="loginForm" class="auth-form">
+        <div class="afield">
+          <label>Email address</label>
+          <input type="email" id="loginEmail" placeholder="you@example.com"
+            onkeydown="if(event.key==='Enter')handleLogin()">
+        </div>
+        <div class="afield">
+          <label>Password</label>
+          <input type="password" id="loginPassword" placeholder="••••••••"
+            onkeydown="if(event.key==='Enter')handleLogin()">
+        </div>
+        <button class="btn-primary" id="btnLogin" onclick="handleLogin()">Sign In →</button>
+        <p class="powered">🔐 Secured by AWS Cognito</p>
       </div>
-      <button class="btn-primary" onclick="handleLogin()">Sign In →</button>
+
+      <!-- Signup -->
+      <div id="signupForm" class="auth-form" style="display:none">
+        <div class="afield">
+          <label>Email address</label>
+          <input type="email" id="signupEmail" placeholder="you@example.com">
+        </div>
+        <div class="afield">
+          <label>Password</label>
+          <input type="password" id="signupPassword" placeholder="Min 8 chars, uppercase + number">
+        </div>
+        <button class="btn-primary" id="btnSignup" onclick="handleSignup()">Create Account →</button>
+        <p class="powered">🔐 Secured by AWS Cognito</p>
+      </div>
+
+      <!-- Confirm -->
+      <div id="confirmForm" style="display:none; text-align:center">
+        <div class="confirm-env">✉️</div>
+        <p class="confirm-desc">A 6-digit code was sent to your email. Enter it below to verify your account.</p>
+        <br>
+        <div class="auth-form">
+          <div class="afield" style="text-align:left">
+            <label>Email</label>
+            <input type="email" id="confirmEmail" readonly>
+          </div>
+          <div class="afield" style="text-align:left">
+            <label>Verification Code</label>
+            <input type="text" id="confirmCode" placeholder="123456" maxlength="6"
+              style="letter-spacing:6px;font-size:18px;text-align:center"
+              onkeydown="if(event.key==='Enter')handleConfirm()">
+          </div>
+          <button class="btn-primary" onclick="handleConfirm()">Verify Email ✓</button>
+          <div class="form-stack">
+            <button class="btn-ghost" onclick="handleResend()">Resend Code</button>
+            <button class="btn-ghost" onclick="switchAuthTab('login')">← Back to Sign In</button>
+          </div>
+        </div>
+      </div>
     </div>
-
-    <!-- Signup Form -->
-    <div id="signupForm" style="display:none">
-      <div class="form-group">
-        <label>Email</label>
-        <input type="email" id="signupEmail" placeholder="you@example.com" />
-      </div>
-      <div class="form-group">
-        <label>Password</label>
-        <input type="password" id="signupPassword" placeholder="Min 8 chars, uppercase, number" />
-      </div>
-      <button class="btn-primary" onclick="handleSignup()">Create Account →</button>
-    </div>
-
-    <!-- Confirm Form — shown after signup -->
-    <div id="confirmForm" style="display:none">
-      <p class="confirm-hint">A 6-digit code was sent to your email. Enter it below to verify your account.</p>
-      <div class="form-group">
-        <label>Email</label>
-        <input type="email" id="confirmEmail" readonly />
-      </div>
-      <div class="form-group">
-        <label>Verification Code</label>
-        <input type="text" id="confirmCode" placeholder="123456" maxlength="6" />
-      </div>
-      <button class="btn-primary" onclick="handleConfirm()">Verify Email →</button>
-      <button class="btn-ghost" onclick="handleResend()">Resend Code</button>
-      <button class="btn-ghost" onclick="switchTab('login')">Back to Sign In</button>
-    </div>
-
-    <div class="powered-by">🔐 Powered by AWS Cognito</div>
   </div>
 </div>
 
-<!-- =========================================================
-     MAIN APP
-========================================================= -->
-<div class="app-screen" id="appScreen">
-  <nav>
+<!-- ============================================================
+     APP SCREEN
+============================================================ -->
+<div id="appScreen">
+  <nav class="topnav">
     <div class="nav-brand">
-      <div class="nav-brand-icon">🔧</div>
-      AutoServe Pro
+      <div class="nav-brand-box">🔧</div>
+      <span>AutoServe <em>Pro</em></span>
     </div>
-    <div class="nav-user">
-      <span id="navEmail"></span>
-      <button class="btn-logout" onclick="handleLogout()">Sign out</button>
+    <div class="nav-tabs">
+      <button class="nav-tab active" id="nt-dashboard" onclick="showTab('dashboard')">
+        📊 Dashboard
+      </button>
+      <button class="nav-tab" id="nt-book" onclick="showTab('book')">
+        📅 Book Service
+      </button>
+      <button class="nav-tab" id="nt-bookings" onclick="showTab('bookings')">
+        📋 <span id="bookTabLabel">My Bookings</span>
+      </button>
+    </div>
+    <div class="nav-right">
+      <span class="badge-admin" id="adminBadge">Admin</span>
+      <span class="nav-email"   id="navEmail"></span>
+      <button class="btn-signout" onclick="handleLogout()">Sign out</button>
     </div>
   </nav>
 
-  <div class="container">
-    <div class="page-tabs">
-      <button id="tabBooking"   class="page-tab active" onclick="showPage('booking')">Book a Service</button>
-      <button id="tabDashboard" class="page-tab"         onclick="showPage('dashboard')">My Bookings</button>
+  <!-- DASHBOARD -->
+  <div id="page-dashboard" class="page active">
+    <div class="admin-banner" id="adminBanner">
+      <div class="admin-banner-icon">🛡️</div>
+      <div>
+        <h3>Admin Panel</h3>
+        <p>You have full access — view all customer bookings and update service statuses.</p>
+      </div>
     </div>
 
-    <!-- =====================================================
-         BOOKING PAGE
-    ===================================================== -->
-    <div id="bookingPage">
-      <div class="booking-card">
-        <h2>Book a Service</h2>
+    <div class="page-head">
+      <h1 id="dashTitle">Dashboard</h1>
+      <p  id="dashSub">Your service overview</p>
+    </div>
 
-        <div id="bookingSuccess" class="success-msg"></div>
-        <div id="bookingError"   class="error-msg"></div>
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(245,158,11,0.1)">📋</div>
+        <div><div class="stat-num" id="statTotal">—</div><div class="stat-lbl">Total</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(59,130,246,0.1)">✅</div>
+        <div><div class="stat-num" id="statConfirmed">—</div><div class="stat-lbl">Confirmed</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(16,185,129,0.1)">🏁</div>
+        <div><div class="stat-num" id="statCompleted">—</div><div class="stat-lbl">Completed</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(139,92,246,0.1)">⏳</div>
+        <div><div class="stat-num" id="statPending">—</div><div class="stat-lbl">Pending</div></div>
+      </div>
+    </div>
 
-        <div class="form-group">
-          <label>Vehicle</label>
-          <input type="text" id="vehicleInput" placeholder="e.g. Honda Civic 2021" />
+    <div class="cta-book" id="ctaBook" onclick="showTab('book')" style="display:none">
+      <div class="cta-left">
+        <h3>Ready for your next service?</h3>
+        <p>Book oil change, tire rotation, brakes and more in under a minute.</p>
+      </div>
+      <div class="cta-arrow">→</div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <h3 id="dashTableTitle">Recent Bookings</h3>
+        <span class="src-tag" id="dashSrc"></span>
+      </div>
+      <div class="tbl-wrap">
+        <div id="dashContainer">
+          <div class="empty"><div class="spinner"></div></div>
         </div>
+      </div>
+    </div>
+  </div>
 
-        <div class="form-group">
-          <label>Service Type</label>
-          <div class="services-grid">
-            <div class="service-item selected" onclick="selectService(this, 'Oil Change')">
-              <div>🛢️</div>
-              <div class="service-name">Oil Change</div>
-              <div class="service-price">$49</div>
-            </div>
-            <div class="service-item" onclick="selectService(this, 'Tire Rotation')">
-              <div>🔄</div>
-              <div class="service-name">Tire Rotation</div>
-              <div class="service-price">$29</div>
-            </div>
-            <div class="service-item" onclick="selectService(this, 'Brake Inspection')">
-              <div>🛑</div>
-              <div class="service-name">Brake Inspection</div>
-              <div class="service-price">$49</div>
-            </div>
-            <div class="service-item" onclick="selectService(this, 'Full Service')">
-              <div>🔧</div>
-              <div class="service-name">Full Service</div>
-              <div class="service-price">$149</div>
-            </div>
-            <div class="service-item" onclick="selectService(this, 'AC Service')">
-              <div>❄️</div>
-              <div class="service-name">AC Service</div>
-              <div class="service-price">$89</div>
-            </div>
-            <div class="service-item" onclick="selectService(this, 'Battery Check')">
-              <div>🔋</div>
-              <div class="service-name">Battery Check</div>
-              <div class="service-price">$19</div>
+  <!-- BOOK SERVICE -->
+  <div id="page-book" class="page">
+    <div class="page-head">
+      <h1>Book a Service</h1>
+      <p>Choose a service, pick a date and time — we'll take care of the rest.</p>
+    </div>
+    <div class="book-layout">
+      <div>
+        <div class="section" style="margin-bottom:0">
+          <div class="section-head"><h3>Select Service</h3></div>
+          <div style="padding:16px">
+            <div class="svc-grid">
+              <div class="svc-card sel" onclick="selectSvc(this,'Oil Change','30 min','$49')">
+                <span class="svc-icon">🛢️</span>
+                <div class="svc-name">Oil Change</div>
+                <div class="svc-meta">30 min · $49</div>
+              </div>
+              <div class="svc-card" onclick="selectSvc(this,'Tire Rotation','45 min','$29')">
+                <span class="svc-icon">🔄</span>
+                <div class="svc-name">Tire Rotation</div>
+                <div class="svc-meta">45 min · $29</div>
+              </div>
+              <div class="svc-card" onclick="selectSvc(this,'Brake Inspection','60 min','$49')">
+                <span class="svc-icon">🛑</span>
+                <div class="svc-name">Brake Inspection</div>
+                <div class="svc-meta">60 min · $49</div>
+              </div>
+              <div class="svc-card" onclick="selectSvc(this,'Battery Check','20 min','$19')">
+                <span class="svc-icon">🔋</span>
+                <div class="svc-name">Battery Check</div>
+                <div class="svc-meta">20 min · $19</div>
+              </div>
+              <div class="svc-card" onclick="selectSvc(this,'AC Service','90 min','$89')">
+                <span class="svc-icon">❄️</span>
+                <div class="svc-name">AC Service</div>
+                <div class="svc-meta">90 min · $89</div>
+              </div>
+              <div class="svc-card" onclick="selectSvc(this,'Full Service','120 min','$149')">
+                <span class="svc-icon">⚙️</span>
+                <div class="svc-name">Full Service</div>
+                <div class="svc-meta">120 min · $149</div>
+              </div>
             </div>
           </div>
         </div>
+      </div>
 
-        <div class="form-group">
-          <label>Preferred Date</label>
-          <input type="date" id="dateInput" />
+      <div class="book-panel">
+        <div class="bsum">
+          <div class="bsum-icon">🔧</div>
+          <div>
+            <div class="bsum-svc" id="bsumName">Oil Change</div>
+            <div class="bsum-sub" id="bsumMeta">30 min · $49</div>
+          </div>
         </div>
-
-        <div class="form-group">
-          <label>Time Slot</label>
+        <div class="psec">
+          <div class="plabel">Vehicle</div>
+          <input class="pinput" type="text" id="vehicleInput" placeholder="e.g. Honda Civic 2021">
+        </div>
+        <div class="psec">
+          <div class="plabel">Date</div>
+          <input class="pinput" type="date" id="dateInput">
+        </div>
+        <div class="psec">
+          <div class="plabel">Time Slot</div>
           <div class="slots-grid">
-            <div class="slot selected" onclick="selectSlot(this, '9:00 AM')">9:00 AM</div>
-            <div class="slot" onclick="selectSlot(this, '10:30 AM')">10:30 AM</div>
-            <div class="slot" onclick="selectSlot(this, '12:00 PM')">12:00 PM</div>
-            <div class="slot" onclick="selectSlot(this, '2:00 PM')">2:00 PM</div>
-            <div class="slot" onclick="selectSlot(this, '3:30 PM')">3:30 PM</div>
-            <div class="slot" onclick="selectSlot(this, '5:00 PM')">5:00 PM</div>
+            <button class="slot sel" onclick="selectSlot(this,'9:00 AM')">9:00 AM</button>
+            <button class="slot"     onclick="selectSlot(this,'10:30 AM')">10:30 AM</button>
+            <button class="slot"     onclick="selectSlot(this,'12:00 PM')">12:00 PM</button>
+            <button class="slot"     onclick="selectSlot(this,'2:00 PM')">2:00 PM</button>
+            <button class="slot"     onclick="selectSlot(this,'3:30 PM')">3:30 PM</button>
+            <button class="slot"     onclick="selectSlot(this,'5:00 PM')">5:00 PM</button>
           </div>
         </div>
-
-        <button class="btn-primary" onclick="handleBooking()">Confirm Booking →</button>
+        <div id="bookErr" class="book-error"></div>
+        <div id="bookOk"  class="book-success"></div>
+        <button class="btn-primary" id="btnBook" onclick="handleBooking()" style="width:100%">
+          Confirm Booking →
+        </button>
       </div>
     </div>
+  </div>
 
-    <!-- =====================================================
-         DASHBOARD PAGE
-    ===================================================== -->
-    <div id="dashboardPage" style="display:none">
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-label">Total Bookings</div>
-          <div class="stat-value" id="statTotal">—</div>
-          <div class="stat-sub">All time</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Confirmed</div>
-          <div class="stat-value" id="statConfirmed">—</div>
-          <div class="stat-sub">Active</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Completed</div>
-          <div class="stat-value" id="statCompleted">—</div>
-          <div class="stat-sub">Done</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Pending</div>
-          <div class="stat-value" id="statPending">—</div>
-          <div class="stat-sub">Awaiting</div>
+  <!-- MY BOOKINGS / ALL BOOKINGS -->
+  <div id="page-bookings" class="page">
+    <div class="page-head">
+      <h1 id="bpTitle">My Bookings</h1>
+      <p  id="bpSub">Full history of your service appointments</p>
+    </div>
+    <div class="section">
+      <div class="section-head">
+        <h3 id="bpSecTitle">Your Bookings</h3>
+        <div style="display:flex;align-items:center;gap:10px">
+          <input class="search-box" id="searchBox" type="text" placeholder="Search email, vehicle, service…"
+            oninput="filterTable(this.value)" style="display:none">
+          <span class="src-tag" id="bpSrc"></span>
         </div>
       </div>
-
-      <div class="bookings-table">
-        <div class="table-header">
-          My Bookings
-          <span id="cacheSource"></span>
-        </div>
-        <div id="bookingsContainer">
-          <div class="loading">Loading bookings...</div>
+      <div class="tbl-wrap">
+        <div id="bpContainer">
+          <div class="empty"><div class="spinner"></div></div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<script>
-// =============================================================================
-// CONFIGURATION
-// API calls go to CloudFront /api/* which forwards to ALB → Flask
-// =============================================================================
-const API_BASE = '/api';
+<div id="toast"></div>
 
-// =============================================================================
-// STATE
-// =============================================================================
-let currentUser     = null;
+<script>
+const API_BASE = '/api';
 let accessToken     = null;
+let currentUser     = null;
 let selectedService = 'Oil Change';
 let selectedSlot    = '9:00 AM';
+let bookingsCache   = null;
 
-// =============================================================================
-// AUTH TAB SWITCHING
-// Uses IDs instead of event.target so it can also be called programmatically
-// (e.g. from handleConfirm to switch back to login after verification)
-// =============================================================================
-function switchTab(tab) {
-  document.getElementById('tabLogin').classList.toggle('active',  tab === 'login');
-  document.getElementById('tabSignup').classList.toggle('active', tab === 'signup');
-  document.getElementById('loginForm').style.display   = tab === 'login'  ? 'block' : 'none';
-  document.getElementById('signupForm').style.display  = tab === 'signup' ? 'block' : 'none';
+// ── AUTH ──────────────────────────────────────────────────────
+function switchAuthTab(tab) {
+  const login = tab === 'login';
+  document.getElementById('tabLogin').classList.toggle('active', login);
+  document.getElementById('tabSignup').classList.toggle('active', !login);
+  document.getElementById('loginForm').style.display   = login  ? 'flex' : 'none';
+  document.getElementById('signupForm').style.display  = !login ? 'flex' : 'none';
   document.getElementById('confirmForm').style.display = 'none';
-  hideError();
+  document.getElementById('authTabs').style.display    = 'flex';
+  document.getElementById('authTitle').textContent     = login ? 'Welcome back' : 'Create account';
+  document.getElementById('authSub').textContent       = login
+    ? 'Sign in to manage your service bookings'
+    : 'Join thousands of drivers who trust AutoServe Pro';
+  clearMsg();
 }
 
-// =============================================================================
-// LOGIN
-// =============================================================================
+function showConfirm(email) {
+  document.getElementById('authTabs').style.display    = 'none';
+  document.getElementById('loginForm').style.display   = 'none';
+  document.getElementById('signupForm').style.display  = 'none';
+  document.getElementById('confirmForm').style.display = 'block';
+  document.getElementById('confirmEmail').value        = email;
+  document.getElementById('authTitle').textContent     = 'Verify your email';
+  document.getElementById('authSub').textContent       = 'Enter the 6-digit code sent to your inbox';
+  clearMsg();
+}
+
 async function handleLogin() {
-  const email    = document.getElementById('loginEmail').value.trim();
-  const password = document.getElementById('loginPassword').value;
-
-  if (!email || !password) { showError('Please fill in all fields'); return; }
-
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPassword').value;
+  if (!email || !pass) { setErr('Please fill in all fields'); return; }
+  setLoading('btnLogin', true, 'Signing in…');
   try {
-    const response = await fetch(`${API_BASE}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
+    const res  = await fetch(`${API_BASE}/auth/login`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email, password: pass })
     });
-
-    const data = await response.json();
-
-    if (!response.ok) { showError(data.error || 'Login failed'); return; }
-
-    accessToken = data.access_token;
-    currentUser = { email, group: data.group };
+    const data = await res.json();
+    if (!res.ok) { setErr(data.error || 'Login failed'); return; }
+    accessToken  = data.access_token;
+    currentUser  = { email, group: data.group };
+    bookingsCache = null;
     showApp();
-
-  } catch (err) {
-    showError('Network error — please try again');
-  }
+  } catch { setErr('Network error — please try again'); }
+  finally { setLoading('btnLogin', false, 'Sign In →'); }
 }
 
-// =============================================================================
-// SIGNUP
-// On success: hides signup form, shows confirm form with email pre-filled
-// =============================================================================
 async function handleSignup() {
-  const email    = document.getElementById('signupEmail').value.trim();
-  const password = document.getElementById('signupPassword').value;
-
-  if (!email || !password) { showError('Please fill in all fields'); return; }
-
+  const email = document.getElementById('signupEmail').value.trim();
+  const pass  = document.getElementById('signupPassword').value;
+  if (!email || !pass) { setErr('Please fill in all fields'); return; }
+  setLoading('btnSignup', true, 'Creating account…');
   try {
-    const response = await fetch(`${API_BASE}/auth/signup`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
+    const res  = await fetch(`${API_BASE}/auth/signup`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email, password: pass })
     });
-
-    const data = await response.json();
-
-    if (!response.ok) { showError(data.error || 'Signup failed'); return; }
-
-    document.getElementById('signupForm').style.display  = 'none';
-    document.getElementById('loginForm').style.display   = 'none';
-    document.getElementById('confirmForm').style.display = 'block';
-    document.getElementById('tabLogin').classList.remove('active');
-    document.getElementById('tabSignup').classList.remove('active');
-    document.getElementById('confirmEmail').value = email;
-    hideError();
-
-  } catch (err) {
-    showError('Network error — please try again');
-  }
-}
-
-// =============================================================================
-// CONFIRM EMAIL
-// Submits the 6-digit code Cognito sent to the user's inbox.
-// On success: switches to login with a green success message.
-// =============================================================================
-async function handleResend() {
-  const email = document.getElementById('confirmEmail').value.trim();
-  if (!email) { showError('No email found — please sign up again'); return; }
-
-  try {
-    const response = await fetch(`${API_BASE}/auth/resend`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
-    });
-
-    const data = await response.json();
-    const errEl = document.getElementById('authError');
-
-    if (!response.ok) {
-      showError(data.error || 'Failed to resend code');
-      return;
-    }
-
-    errEl.textContent      = '📧 New code sent — check your email.';
-    errEl.style.color      = '#10b981';
-    errEl.style.background = 'rgba(16,185,129,0.1)';
-    errEl.style.border     = '1px solid rgba(16,185,129,0.3)';
-    errEl.style.display    = 'block';
-    document.getElementById('confirmCode').value = '';
-
-  } catch (err) {
-    showError('Network error — please try again');
-  }
+    const data = await res.json();
+    if (!res.ok) { setErr(data.error || 'Signup failed'); return; }
+    showConfirm(email);
+  } catch { setErr('Network error — please try again'); }
+  finally { setLoading('btnSignup', false, 'Create Account →'); }
 }
 
 async function handleConfirm() {
   const email = document.getElementById('confirmEmail').value.trim();
   const code  = document.getElementById('confirmCode').value.trim();
-
-  if (!code) { showError('Please enter the verification code'); return; }
-
+  if (!code) { setErr('Please enter the verification code'); return; }
   try {
-    const response = await fetch(`${API_BASE}/auth/confirm`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const res  = await fetch(`${API_BASE}/auth/confirm`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ email, code })
     });
+    const data = await res.json();
+    if (!res.ok) { setErr(data.error || 'Verification failed'); return; }
+    setOk('Email verified! Redirecting to sign in…');
+    setTimeout(() => switchAuthTab('login'), 1500);
+  } catch { setErr('Network error'); }
+}
 
-    const data = await response.json();
+async function handleResend() {
+  const email = document.getElementById('confirmEmail').value.trim();
+  try {
+    const res  = await fetch(`${API_BASE}/auth/resend`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email })
+    });
+    const data = await res.json();
+    res.ok ? setOk('New code sent to your email.') : setErr(data.error || 'Failed to resend');
+  } catch { setErr('Network error'); }
+}
 
-    if (!response.ok) { showError(data.error || 'Verification failed'); return; }
+function handleLogout() {
+  accessToken = currentUser = bookingsCache = null;
+  document.getElementById('appScreen').style.display = 'none';
+  document.getElementById('authPage').style.display  = 'flex';
+  switchAuthTab('login');
+}
 
-    switchTab('login');
-    const errEl = document.getElementById('authError');
-    errEl.textContent      = '✅ Email verified! You can now sign in.';
-    errEl.style.color      = '#10b981';
-    errEl.style.background = 'rgba(16,185,129,0.1)';
-    errEl.style.border     = '1px solid rgba(16,185,129,0.3)';
-    errEl.style.display    = 'block';
+// ── APP INIT ──────────────────────────────────────────────────
+function showApp() {
+  document.getElementById('authPage').style.display  = 'none';
+  document.getElementById('appScreen').style.display = 'block';
 
-  } catch (err) {
-    showError('Network error — please try again');
+  const isAdmin = currentUser.group === 'admins';
+  document.getElementById('navEmail').textContent = currentUser.email;
+
+  if (isAdmin) {
+    document.getElementById('adminBadge').style.display = 'inline-flex';
+    document.getElementById('adminBanner').classList.add('show');
+    document.getElementById('nt-book').classList.add('hidden');
+    document.getElementById('bookTabLabel').textContent = 'All Bookings';
+    document.getElementById('bpTitle').textContent      = 'All Bookings';
+    document.getElementById('bpSub').textContent        = 'Every booking across all customers';
+    document.getElementById('bpSecTitle').textContent   = 'Bookings';
+    document.getElementById('searchBox').style.display  = 'block';
+    document.getElementById('dashTitle').textContent    = 'Admin Dashboard';
+    document.getElementById('dashSub').textContent      = 'Platform-wide booking overview';
+    document.getElementById('dashTableTitle').textContent = 'All Bookings';
+  } else {
+    document.getElementById('ctaBook').style.display    = 'flex';
+    document.getElementById('dashTitle').textContent    = 'Dashboard';
+    document.getElementById('dashSub').textContent      = currentUser.email;
+  }
+
+  showTab('dashboard');
+}
+
+// ── TABS ──────────────────────────────────────────────────────
+function showTab(tab) {
+  ['dashboard','book','bookings'].forEach(t => {
+    document.getElementById(`page-${t}`).classList.toggle('active', t === tab);
+    const nt = document.getElementById(`nt-${t}`);
+    if (nt) nt.classList.toggle('active', t === tab);
+  });
+  if (tab === 'dashboard') loadDashboard();
+  if (tab === 'bookings')  loadBookingsTab();
+}
+
+// ── DATA ──────────────────────────────────────────────────────
+async function fetchData() {
+  const isAdmin = currentUser.group === 'admins';
+  const url = isAdmin ? `${API_BASE}/admin/bookings` : `${API_BASE}/bookings`;
+  const res  = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+  if (!res.ok) throw new Error('fetch failed');
+  const data = await res.json();
+  bookingsCache = data.bookings;
+  return data;
+}
+
+async function loadDashboard() {
+  document.getElementById('dashContainer').innerHTML = `<div class="empty"><div class="spinner"></div></div>`;
+  try {
+    const data = await fetchData();
+    const b = data.bookings;
+    document.getElementById('statTotal').textContent     = b.length;
+    document.getElementById('statConfirmed').textContent = b.filter(x => x.status === 'confirmed').length;
+    document.getElementById('statCompleted').textContent = b.filter(x => x.status === 'completed').length;
+    document.getElementById('statPending').textContent   = b.filter(x => x.status === 'pending').length;
+    document.getElementById('dashSrc').textContent       = data.source === 'cache' ? '⚡ Redis cache' : '🗄️ Live from RDS';
+    renderTable('dashContainer', b.slice(0, 8), true);
+  } catch {
+    document.getElementById('dashContainer').innerHTML =
+      `<div class="empty"><div class="empty-icon">⚠️</div><h4>Could not load data</h4><p>Check your connection and refresh.</p></div>`;
   }
 }
 
-// =============================================================================
-// LOGOUT
-// =============================================================================
-function handleLogout() {
-  accessToken = null;
-  currentUser = null;
-  document.getElementById('appScreen').style.display  = 'none';
-  document.getElementById('authScreen').style.display = 'flex';
+async function loadBookingsTab() {
+  if (bookingsCache) { renderTable('bpContainer', bookingsCache, false); return; }
+  document.getElementById('bpContainer').innerHTML = `<div class="empty"><div class="spinner"></div></div>`;
+  try {
+    const data = await fetchData();
+    document.getElementById('bpSrc').textContent = data.source === 'cache' ? '⚡ Redis cache' : '🗄️ Live from RDS';
+    renderTable('bpContainer', bookingsCache, false);
+  } catch {
+    document.getElementById('bpContainer').innerHTML =
+      `<div class="empty"><div class="empty-icon">⚠️</div><h4>Failed to load bookings</h4></div>`;
+  }
 }
 
-// =============================================================================
-// SHOW APP AFTER LOGIN
-// Uses IDs instead of event.target — safe to call programmatically
-// =============================================================================
-function showApp() {
-  document.getElementById('authScreen').style.display = 'none';
-  document.getElementById('appScreen').style.display  = 'block';
-  document.getElementById('navEmail').textContent     = currentUser.email;
-  showPage('booking');
+// ── RENDER TABLE ─────────────────────────────────────────────
+function renderTable(id, rows, compact) {
+  const el      = document.getElementById(id);
+  const isAdmin = currentUser.group === 'admins';
+
+  if (!rows || rows.length === 0) {
+    el.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">${isAdmin ? '📋' : '🔧'}</div>
+        <h4>${isAdmin ? 'No bookings yet' : 'No bookings yet'}</h4>
+        <p>${isAdmin ? 'Bookings appear here once customers start booking.' : 'Book your first service to get started.'}</p>
+      </div>`;
+    return;
+  }
+
+  const custH    = isAdmin ? `<th>Customer</th>` : '';
+  const actionH  = (isAdmin && !compact) ? `<th>Update Status</th>` : '';
+
+  const html = rows.map(b => {
+    const custC   = isAdmin ? `<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis">${b.user_email || b.user_id.slice(0,14)+'…'}</td>` : '';
+    const actionC = (isAdmin && !compact)
+      ? `<td>
+           <select class="status-sel" onchange="updateStatus(${b.id},this.value)">
+             <option value="">— update —</option>
+             <option value="pending">Pending</option>
+             <option value="confirmed">Confirmed</option>
+             <option value="in_progress">In Progress</option>
+             <option value="completed">Completed</option>
+             <option value="cancelled">Cancelled</option>
+           </select>
+         </td>`
+      : '';
+    return `<tr>
+      <td class="bid">SVC-${String(b.id).padStart(4,'0')}</td>
+      ${custC}
+      <td>${b.vehicle}</td>
+      <td>${b.service}</td>
+      <td>${b.date}</td>
+      <td>${b.time_slot}</td>
+      <td><span class="badge badge-${b.status}">${b.status.replace('_',' ')}</span></td>
+      ${actionC}
+    </tr>`;
+  }).join('');
+
+  el.innerHTML = `
+    <table>
+      <thead><tr>
+        <th>Booking ID</th>${custH}<th>Vehicle</th><th>Service</th>
+        <th>Date</th><th>Time</th><th>Status</th>${actionH}
+      </tr></thead>
+      <tbody>${html}</tbody>
+    </table>`;
 }
 
-// =============================================================================
-// PAGE NAVIGATION
-// Uses IDs instead of event.target — safe to call programmatically
-// =============================================================================
-function showPage(page) {
-  document.getElementById('tabBooking').classList.toggle('active',   page === 'booking');
-  document.getElementById('tabDashboard').classList.toggle('active', page === 'dashboard');
-  document.getElementById('bookingPage').style.display   = page === 'booking'   ? 'block' : 'none';
-  document.getElementById('dashboardPage').style.display = page === 'dashboard' ? 'block' : 'none';
-  if (page === 'dashboard') loadBookings();
+// ── SEARCH ───────────────────────────────────────────────────
+function filterTable(q) {
+  if (!bookingsCache) return;
+  const lq = q.toLowerCase();
+  const f  = lq ? bookingsCache.filter(b =>
+    (b.user_email||'').toLowerCase().includes(lq) ||
+    b.vehicle.toLowerCase().includes(lq) ||
+    b.service.toLowerCase().includes(lq) ||
+    String(b.id).includes(lq)
+  ) : bookingsCache;
+  renderTable('bpContainer', f, false);
 }
 
-// =============================================================================
-// SERVICE + SLOT SELECTION
-// =============================================================================
-function selectService(el, service) {
-  document.querySelectorAll('.service-item').forEach(s => s.classList.remove('selected'));
-  el.classList.add('selected');
-  selectedService = service;
+// ── SERVICE / SLOT SELECTION ──────────────────────────────────
+function selectSvc(el, name, dur, price) {
+  document.querySelectorAll('.svc-card').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+  selectedService = name;
+  document.getElementById('bsumName').textContent = name;
+  document.getElementById('bsumMeta').textContent = `${dur} · ${price}`;
 }
 
 function selectSlot(el, slot) {
-  document.querySelectorAll('.slot').forEach(s => s.classList.remove('selected'));
-  el.classList.add('selected');
+  document.querySelectorAll('.slot').forEach(s => s.classList.remove('sel'));
+  el.classList.add('sel');
   selectedSlot = slot;
 }
 
-// =============================================================================
-// CREATE BOOKING
-// =============================================================================
+// ── BOOKING ───────────────────────────────────────────────────
 async function handleBooking() {
   const vehicle = document.getElementById('vehicleInput').value.trim();
   const date    = document.getElementById('dateInput').value;
+  const errEl   = document.getElementById('bookErr');
+  const okEl    = document.getElementById('bookOk');
+  errEl.style.display = okEl.style.display = 'none';
 
-  if (!vehicle) { showBookingError('Please enter your vehicle'); return; }
-  if (!date)    { showBookingError('Please select a date'); return; }
+  if (!vehicle) { errEl.textContent = 'Please enter your vehicle'; errEl.style.display = 'block'; return; }
+  if (!date)    { errEl.textContent = 'Please select a date';      errEl.style.display = 'block'; return; }
 
+  setLoading('btnBook', true, 'Booking…');
   try {
-    const response = await fetch(`${API_BASE}/bookings`, {
+    const res  = await fetch(`${API_BASE}/bookings`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`
-      },
-      body: JSON.stringify({
-        vehicle,
-        service:   selectedService,
-        date,
-        time_slot: selectedSlot
-      })
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+      body: JSON.stringify({ vehicle, service: selectedService, date, time_slot: selectedSlot })
     });
-
-    const data = await response.json();
-
-    if (!response.ok) { showBookingError(data.error || 'Booking failed'); return; }
-
-    const successEl = document.getElementById('bookingSuccess');
-    successEl.textContent = `✅ Booking confirmed! Reference: SVC-${data.booking_id}. Confirmation email on its way.`;
-    successEl.style.display = 'block';
-    document.getElementById('bookingError').style.display = 'none';
-
+    const data = await res.json();
+    if (!res.ok) { errEl.textContent = data.error || 'Booking failed'; errEl.style.display = 'block'; return; }
+    const ref = `SVC-${String(data.booking_id).padStart(4,'0')}`;
+    okEl.textContent = `Booking confirmed! Reference ${ref}. Confirmation email on its way.`;
+    okEl.style.display = 'block';
     document.getElementById('vehicleInput').value = '';
     document.getElementById('dateInput').value    = '';
-
-  } catch (err) {
-    showBookingError('Network error — please try again');
-  }
+    bookingsCache = null;
+    showToast(`${ref} confirmed!`, 'ok');
+  } catch { errEl.textContent = 'Network error — please try again'; errEl.style.display = 'block'; }
+  finally { setLoading('btnBook', false, 'Confirm Booking →'); }
 }
 
-// =============================================================================
-// LOAD BOOKINGS
-// =============================================================================
-async function loadBookings() {
-  document.getElementById('bookingsContainer').innerHTML = '<div class="loading">Loading...</div>';
-
+// ── ADMIN UPDATE STATUS ───────────────────────────────────────
+async function updateStatus(id, status) {
+  if (!status) return;
   try {
-    const response = await fetch(`${API_BASE}/bookings`, {
-      headers: { 'Authorization': `Bearer ${accessToken}` }
+    const res = await fetch(`${API_BASE}/admin/bookings/${id}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+      body: JSON.stringify({ status })
     });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      document.getElementById('bookingsContainer').innerHTML =
-        '<div class="empty-state">Failed to load bookings</div>';
-      return;
+    if (res.ok) {
+      bookingsCache = null;
+      showToast(`SVC-${String(id).padStart(4,'0')} → ${status.replace('_',' ')}`, 'ok');
+      loadBookingsTab();
+    } else {
+      const d = await res.json();
+      showToast(d.error || 'Update failed', 'err');
     }
-
-    const bookings = data.bookings;
-
-    document.getElementById('statTotal').textContent     = bookings.length;
-    document.getElementById('statConfirmed').textContent = bookings.filter(b => b.status === 'confirmed').length;
-    document.getElementById('statCompleted').textContent = bookings.filter(b => b.status === 'completed').length;
-    document.getElementById('statPending').textContent   = bookings.filter(b => b.status === 'pending').length;
-
-    document.getElementById('cacheSource').textContent =
-      data.source === 'cache' ? '⚡ Served from Redis' : '🗄️ Fetched from RDS';
-
-    if (bookings.length === 0) {
-      document.getElementById('bookingsContainer').innerHTML =
-        '<div class="empty-state">No bookings yet — book your first service!</div>';
-      return;
-    }
-
-    document.getElementById('bookingsContainer').innerHTML = `
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Vehicle</th>
-            <th>Service</th>
-            <th>Date</th>
-            <th>Time</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${bookings.map(b => `
-            <tr>
-              <td style="color:#f59e0b;font-weight:600">SVC-${b.id}</td>
-              <td>${b.vehicle}</td>
-              <td>${b.service}</td>
-              <td>${b.date}</td>
-              <td>${b.time_slot}</td>
-              <td><span class="badge badge-${b.status}">${b.status}</span></td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    `;
-
-  } catch (err) {
-    document.getElementById('bookingsContainer').innerHTML =
-      '<div class="empty-state">Network error</div>';
-  }
+  } catch { showToast('Network error', 'err'); }
 }
 
-// =============================================================================
-// ERROR HELPERS
-// =============================================================================
-function showError(msg) {
-  const el = document.getElementById('authError');
-  el.textContent         = msg;
-  el.style.color         = '#ef4444';
-  el.style.background    = 'rgba(239,68,68,0.1)';
-  el.style.border        = '1px solid rgba(239,68,68,0.3)';
-  el.style.display       = 'block';
+// ── TOAST ─────────────────────────────────────────────────────
+let _toastT;
+function showToast(msg, type='info') {
+  const el = document.getElementById('toast');
+  el.className = `t-${type}`;
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(_toastT);
+  _toastT = setTimeout(() => el.classList.remove('show'), 3000);
 }
 
-function hideError() {
+// ── UI HELPERS ────────────────────────────────────────────────
+function setErr(m) {
+  const e = document.getElementById('authError');
+  e.textContent = m; e.style.display = 'block';
+  document.getElementById('authSuccess').style.display = 'none';
+}
+function setOk(m) {
+  const e = document.getElementById('authSuccess');
+  e.textContent = m; e.style.display = 'block';
   document.getElementById('authError').style.display = 'none';
 }
-
-function showBookingError(msg) {
-  const el = document.getElementById('bookingError');
-  el.textContent   = msg;
-  el.style.display = 'block';
-  document.getElementById('bookingSuccess').style.display = 'none';
+function clearMsg() {
+  document.getElementById('authError').style.display   = 'none';
+  document.getElementById('authSuccess').style.display = 'none';
+}
+function setLoading(id, on, label) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.disabled     = on;
+  el.textContent  = label;
 }
 
-document.getElementById('dateInput').min = new Date().toISOString().split('T')[0];
+// Set min booking date to today
+document.addEventListener('DOMContentLoaded', () => {
+  const d = document.getElementById('dateInput');
+  if (d) d.min = new Date().toISOString().split('T')[0];
+});
 </script>
-
 </body>
 </html>
