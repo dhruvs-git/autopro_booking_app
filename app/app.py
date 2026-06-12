@@ -90,6 +90,7 @@ def init_db():
             CREATE TABLE IF NOT EXISTS bookings (
                 id          INT AUTO_INCREMENT PRIMARY KEY,
                 user_id     VARCHAR(255) NOT NULL,
+                user_email  VARCHAR(255) NOT NULL DEFAULT '',
                 vehicle     VARCHAR(255) NOT NULL,
                 service     VARCHAR(255) NOT NULL,
                 date        DATE NOT NULL,
@@ -100,6 +101,11 @@ def init_db():
                 updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             )
         """)
+        try:
+            cursor.execute("ALTER TABLE bookings ADD COLUMN user_email VARCHAR(255) NOT NULL DEFAULT '' AFTER user_id")
+            conn.commit()
+        except Exception:
+            pass  # column already exists
         conn.commit()
         cursor.close()
         conn.close()
@@ -368,10 +374,11 @@ def create_booking():
         cursor = conn.cursor()
         try:
             cursor.execute("""
-                INSERT INTO bookings (user_id, vehicle, service, date, time_slot)
-                VALUES (%s, %s, %s, %s, %s)
+                INSERT INTO bookings (user_id, user_email, vehicle, service, date, time_slot)
+                VALUES (%s, %s, %s, %s, %s, %s)
             """, (
                 request.user_id,
+                request.user_email,
                 data["vehicle"],
                 data["service"],
                 data["date"],

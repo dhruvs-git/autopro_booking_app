@@ -1,6 +1,7 @@
 #S3 Bucket
 resource "aws_s3_bucket" "frontend" {
-  bucket = "${var.name_prefix}-frontend"
+  bucket        = "${var.name_prefix}-frontend"
+  force_destroy = true
 
   tags = {
     Name = "${var.name_prefix}-frontend"
