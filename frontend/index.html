@@ -3,1067 +3,1267 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AutoServe Pro — Vehicle Service Booking</title>
+  <title>AutoServe Pro — Vehicle Service</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
-      --bg:       #0f172a;
-      --s1:       #1e293b;
-      --s2:       #273349;
-      --border:   #334155;
-      --primary:  #f59e0b;
-      --ph:       #d97706;
-      --pglow:    rgba(245,158,11,0.11);
-      --text:     #f1f5f9;
-      --muted:    #94a3b8;
-      --faint:    #64748b;
+      --bg:       #04070f;
+      --bg1:      #080d1c;
+      --card:     rgba(255,255,255,0.03);
+      --card-h:   rgba(255,255,255,0.055);
+      --border:   rgba(255,255,255,0.07);
+      --border-h: rgba(255,255,255,0.16);
+      --primary:  #6366f1;
+      --pl:       #818cf8;
+      --pglow:    rgba(99,102,241,0.14);
+      --cyan:     #22d3ee;
+      --text:     #ffffff;
+      --t2:       rgba(255,255,255,0.58);
+      --t3:       rgba(255,255,255,0.28);
       --green:    #10b981;
       --blue:     #3b82f6;
-      --purple:   #8b5cf6;
       --red:      #ef4444;
-      --r:        12px;
-      --rs:       8px;
+      --amber:    #f59e0b;
+      --r:        20px;
+      --rs:       12px;
+      --rxs:      8px;
     }
 
-    html, body { height: 100%; }
+    html { scroll-behavior: smooth; }
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg); color: var(--text);
+      background: var(--bg);
+      color: var(--text);
       -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 99px; }
+
+    /* ── ANIMATED BACKGROUND ORBS ── */
+    .bg-fx {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+    }
+    .orb {
+      position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.35;
+    }
+    .orb-1 {
+      width: 650px; height: 650px;
+      background: radial-gradient(circle, rgba(99,102,241,0.45) 0%, transparent 70%);
+      top: -220px; left: -180px;
+      animation: drift1 11s ease-in-out infinite;
+    }
+    .orb-2 {
+      width: 450px; height: 450px;
+      background: radial-gradient(circle, rgba(34,211,238,0.28) 0%, transparent 70%);
+      bottom: -120px; right: -120px;
+      animation: drift2 13s ease-in-out infinite;
+    }
+    .orb-3 {
+      width: 320px; height: 320px;
+      background: radial-gradient(circle, rgba(139,92,246,0.22) 0%, transparent 70%);
+      top: 45%; left: 58%;
+      animation: drift3 9s ease-in-out infinite;
+    }
+    @keyframes drift1 { 0%,100%{transform:translate(0,0)}40%{transform:translate(40px,-50px)}70%{transform:translate(-25px,30px)} }
+    @keyframes drift2 { 0%,100%{transform:translate(0,0)}35%{transform:translate(-35px,40px)}70%{transform:translate(20px,-25px)} }
+    @keyframes drift3 { 0%,100%{transform:translate(0,0)}50%{transform:translate(-30px,-35px)} }
+
+    /* ── GRADIENT TEXT ── */
+    .grad {
+      background: linear-gradient(135deg, var(--pl) 0%, var(--cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
-    ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
-
-    /* ============================================================
+    /* ══════════════════════════════════════
        AUTH PAGE
-    ============================================================ */
-    #authPage { min-height: 100vh; display: flex; }
-
-    .auth-left {
-      flex: 1.1;
-      background: linear-gradient(145deg, #090f1e 0%, #101828 50%, #0f172a 100%);
-      padding: 56px 60px;
-      display: none; flex-direction: column; justify-content: space-between;
-      position: relative; overflow: hidden;
+    ══════════════════════════════════════ */
+    #authPage {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px;
     }
-    .auth-left::before {
-      content: ''; position: absolute;
-      width: 480px; height: 480px; border-radius: 50%;
-      background: radial-gradient(circle, rgba(245,158,11,0.07) 0%, transparent 65%);
-      bottom: -80px; right: -100px; pointer-events: none;
+
+    .auth-card {
+      width: 100%; max-width: 428px;
+      background: rgba(255,255,255,0.035);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 28px;
+      padding: 44px 38px;
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      box-shadow: 0 40px 100px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06);
+      animation: card-in 0.5s cubic-bezier(0.34,1.4,0.64,1) both;
     }
-    @media (min-width: 960px) { .auth-left { display: flex; } }
-
-    .al-logo { display: flex; align-items: center; gap: 12px; }
-    .al-logo-box {
-      width: 42px; height: 42px; background: var(--primary);
-      border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px;
+    @keyframes card-in {
+      from { opacity: 0; transform: translateY(28px) scale(0.96); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
     }
-    .al-logo-name { font-size: 19px; font-weight: 700; letter-spacing: -0.3px; }
-    .al-logo-name em { font-style: normal; color: var(--primary); }
 
-    .al-hero h2 {
-      font-size: 40px; font-weight: 800; letter-spacing: -1.2px; line-height: 1.1;
-      margin-bottom: 16px;
+    .auth-logo {
+      display: flex; align-items: center; justify-content: center;
+      gap: 11px; margin-bottom: 34px;
     }
-    .al-hero p { font-size: 15px; color: var(--muted); line-height: 1.65; max-width: 360px; margin-bottom: 36px; }
-
-    .al-features { display: flex; flex-direction: column; gap: 13px; }
-    .al-feat { display: flex; align-items: center; gap: 11px; font-size: 14px; color: var(--muted); }
-    .al-feat-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--primary); flex-shrink: 0; }
-
-    .al-footer { font-size: 12px; color: var(--faint); }
-
-    /* Auth right */
-    .auth-right { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 28px; }
-    .auth-card  { width: 100%; max-width: 400px; }
-
-    .auth-mob-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 30px; }
-    .auth-mob-logo-box {
-      width: 34px; height: 34px; background: var(--primary);
-      border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 17px;
+    .logo-mark {
+      width: 46px; height: 46px;
+      background: linear-gradient(135deg, var(--primary), var(--cyan));
+      border-radius: 13px;
+      display: flex; align-items: center; justify-content: center; font-size: 22px;
+      box-shadow: 0 8px 28px rgba(99,102,241,0.45);
     }
-    .auth-mob-logo-text { font-size: 16px; font-weight: 700; }
-    .auth-mob-logo-text em { font-style: normal; color: var(--primary); }
-    @media (min-width: 960px) { .auth-mob-logo { display: none; } }
+    .logo-name { font-size: 21px; font-weight: 800; letter-spacing: -0.5px; }
 
-    .auth-title    { font-size: 25px; font-weight: 700; letter-spacing: -0.4px; margin-bottom: 4px; }
-    .auth-subtitle { font-size: 13px; color: var(--muted); margin-bottom: 22px; }
+    .auth-title {
+      font-size: 28px; font-weight: 900; letter-spacing: -0.7px;
+      text-align: center; margin-bottom: 6px;
+    }
+    .auth-sub {
+      font-size: 13px; color: var(--t2);
+      text-align: center; margin-bottom: 28px; line-height: 1.5;
+    }
 
     .auth-tabs {
-      display: flex; background: var(--s1);
-      border-radius: var(--rs); padding: 4px; gap: 4px; margin-bottom: 22px;
+      display: flex;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: var(--rs);
+      padding: 4px; gap: 4px;
+      margin-bottom: 24px;
     }
     .auth-tab {
-      flex: 1; padding: 9px; border: none; background: transparent;
-      color: var(--muted); font-size: 13px; font-weight: 500;
-      cursor: pointer; border-radius: 6px; transition: all 0.15s; font-family: inherit;
+      flex: 1; padding: 10px;
+      border: none; background: transparent;
+      color: var(--t2); font-size: 13px; font-weight: 600;
+      cursor: pointer; border-radius: var(--rxs);
+      transition: all 0.2s; font-family: inherit;
     }
-    .auth-tab.active { background: var(--s2); color: var(--text); }
+    .auth-tab.active {
+      background: rgba(99,102,241,0.18);
+      color: var(--pl);
+      box-shadow: 0 2px 10px rgba(99,102,241,0.2);
+    }
 
-    .auth-form { display: flex; flex-direction: column; gap: 14px; }
-    .afield { display: flex; flex-direction: column; gap: 5px; }
-    .afield label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
-    .afield input {
-      padding: 11px 13px;
-      background: var(--s1); border: 1px solid var(--border);
-      border-radius: var(--rs); color: var(--text); font-size: 14px; font-family: inherit;
-      transition: border-color 0.15s; outline: none;
+    .auth-form { display: flex; flex-direction: column; gap: 16px; }
+
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label {
+      font-size: 11px; font-weight: 700; color: var(--t3);
+      text-transform: uppercase; letter-spacing: 0.9px;
     }
-    .afield input:focus { border-color: var(--primary); }
-    .afield input::placeholder { color: var(--faint); }
-    .afield input[readonly] { opacity: 0.55; cursor: default; }
+    .field input {
+      padding: 13px 15px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--rs);
+      color: var(--text); font-size: 14px; font-family: inherit;
+      outline: none; transition: all 0.2s;
+    }
+    .field input:focus {
+      border-color: var(--primary);
+      background: rgba(99,102,241,0.07);
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.18);
+    }
+    .field input::placeholder { color: var(--t3); }
+    .field input[readonly] { opacity: 0.45; cursor: default; }
 
     .btn-primary {
-      padding: 12px 18px; background: var(--primary); color: #000;
-      border: none; border-radius: var(--rs); font-size: 14px; font-weight: 600;
-      cursor: pointer; font-family: inherit; transition: background 0.15s, transform 0.1s;
-      display: flex; align-items: center; justify-content: center; gap: 7px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 14px 20px;
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: #fff; border: none; border-radius: var(--rs);
+      font-size: 14px; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+      transition: all 0.22s;
+      box-shadow: 0 8px 28px rgba(99,102,241,0.45);
+      position: relative; overflow: hidden;
     }
-    .btn-primary:hover  { background: var(--ph); }
-    .btn-primary:active { transform: scale(0.98); }
-    .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+    .btn-primary::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, transparent 60%);
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 36px rgba(99,102,241,0.55); }
+    .btn-primary:hover::after { opacity: 1; }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
 
     .btn-ghost {
-      padding: 10px 14px; background: transparent; color: var(--muted);
+      padding: 11px 16px;
+      background: transparent; color: var(--t2);
       border: 1px solid var(--border); border-radius: var(--rs);
-      font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all 0.15s;
+      font-size: 13px; font-weight: 500;
+      cursor: pointer; font-family: inherit; transition: all 0.2s;
     }
-    .btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
+    .btn-ghost:hover { border-color: var(--primary); color: var(--pl); background: var(--pglow); }
 
-    .auth-error {
-      padding: 11px 13px; background: rgba(239,68,68,0.1);
-      border: 1px solid rgba(239,68,68,0.28); border-radius: var(--rs);
-      color: #ef4444; font-size: 13px; display: none;
+    .msg-err {
+      padding: 12px 14px;
+      background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.22);
+      border-radius: var(--rs); color: #fc8181; font-size: 13px; display: none;
     }
-    .auth-success {
-      padding: 11px 13px; background: rgba(16,185,129,0.1);
-      border: 1px solid rgba(16,185,129,0.28); border-radius: var(--rs);
-      color: #10b981; font-size: 13px; display: none;
+    .msg-ok {
+      padding: 12px 14px;
+      background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.22);
+      border-radius: var(--rs); color: #6ee7b7; font-size: 13px; display: none;
     }
 
-    .confirm-env {
-      width: 50px; height: 50px; background: rgba(245,158,11,0.1); border-radius: 50%;
-      display: flex; align-items: center; justify-content: center; font-size: 22px; margin: 0 auto 14px;
+    .confirm-icon {
+      width: 58px; height: 58px;
+      background: rgba(99,102,241,0.14); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; margin: 0 auto 16px;
     }
-    .confirm-desc { font-size: 13px; color: var(--muted); text-align: center; margin-bottom: 4px; line-height: 1.55; }
-    .form-stack   { display: flex; flex-direction: column; gap: 8px; }
-    .powered      { font-size: 12px; color: var(--faint); text-align: center; }
+    .confirm-desc {
+      font-size: 13px; color: var(--t2); text-align: center;
+      line-height: 1.65; margin-bottom: 20px;
+    }
+    .stack { display: flex; flex-direction: column; gap: 8px; }
+    .powered { font-size: 11px; color: var(--t3); text-align: center; letter-spacing: 0.3px; }
 
-    /* ============================================================
+    /* ══════════════════════════════════════
        APP SCREEN
-    ============================================================ */
-    #appScreen { display: none; min-height: 100vh; }
+    ══════════════════════════════════════ */
+    #appScreen { display: none; min-height: 100vh; position: relative; z-index: 1; }
 
-    .topnav {
-      position: sticky; top: 0; z-index: 100; height: 60px;
-      background: rgba(15,23,42,0.97); backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; padding: 0 20px; gap: 20px;
+    /* ── NAV ── */
+    .nav {
+      position: sticky; top: 0; z-index: 200;
+      height: 66px;
+      display: flex; align-items: center;
+      padding: 0 28px; gap: 20px;
+      background: rgba(4,7,15,0.65);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border-bottom: 1px solid rgba(255,255,255,0.055);
+      box-shadow: 0 1px 30px rgba(0,0,0,0.4);
     }
 
-    .nav-brand {
-      display: flex; align-items: center; gap: 9px;
-      font-size: 15px; font-weight: 700; letter-spacing: -0.3px; flex-shrink: 0;
+    .nav-logo { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .nav-mark {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, var(--primary), var(--cyan));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; font-size: 17px;
     }
-    .nav-brand-box {
-      width: 30px; height: 30px; background: var(--primary); border-radius: 7px;
-      display: flex; align-items: center; justify-content: center; font-size: 15px;
-    }
-    .nav-brand em { font-style: normal; color: var(--primary); }
+    .nav-name { font-size: 15px; font-weight: 800; letter-spacing: -0.3px; }
 
     .nav-tabs { display: flex; gap: 2px; flex: 1; }
     .nav-tab {
-      padding: 7px 13px; border: none; background: transparent;
-      color: var(--muted); font-size: 13px; font-weight: 500;
-      cursor: pointer; border-radius: var(--rs); transition: all 0.15s; font-family: inherit;
-      display: flex; align-items: center; gap: 6px;
+      display: flex; align-items: center; gap: 7px;
+      padding: 8px 15px;
+      border: none; background: transparent;
+      color: var(--t2); font-size: 13px; font-weight: 500;
+      cursor: pointer; border-radius: var(--rxs);
+      transition: all 0.2s; font-family: inherit;
     }
-    .nav-tab:hover  { background: var(--s1); color: var(--text); }
-    .nav-tab.active { background: var(--pglow); color: var(--primary); }
+    .nav-tab:hover  { background: rgba(255,255,255,0.05); color: var(--text); }
+    .nav-tab.active { background: rgba(99,102,241,0.13); color: var(--pl); }
     .nav-tab.hidden { display: none; }
 
     .nav-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-
-    .badge-admin {
-      padding: 2px 9px; background: rgba(245,158,11,0.13);
-      border: 1px solid rgba(245,158,11,0.3); border-radius: 20px;
-      font-size: 10px; font-weight: 700; color: var(--primary);
-      text-transform: uppercase; letter-spacing: 0.8px; display: none;
+    .admin-pill {
+      padding: 3px 11px;
+      background: rgba(99,102,241,0.16);
+      border: 1px solid rgba(99,102,241,0.32);
+      border-radius: 99px;
+      font-size: 10px; font-weight: 800;
+      color: var(--pl); text-transform: uppercase; letter-spacing: 1.1px;
+      display: none;
     }
-
     .nav-email {
-      font-size: 12px; color: var(--muted);
-      max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      font-size: 12px; color: var(--t2);
+      max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .btn-out {
+      padding: 7px 13px;
+      background: transparent; border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--rxs); color: var(--t2);
+      font-size: 12px; font-weight: 500;
+      cursor: pointer; font-family: inherit; transition: all 0.2s;
+    }
+    .btn-out:hover { border-color: var(--red); color: #fc8181; }
+
+    /* ── PAGES ── */
+    .page { display: none; padding: 36px 28px 72px; max-width: 1280px; margin: 0 auto; }
+    .page.active { display: block; animation: fadein 0.3s ease both; }
+    @keyframes fadein {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
-    .btn-signout {
-      padding: 6px 12px; background: transparent; color: var(--muted);
-      border: 1px solid var(--border); border-radius: var(--rs);
-      font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all 0.15s;
+    /* ── DASHBOARD HERO ── */
+    .dash-hero { margin-bottom: 32px; }
+    .dash-hero h1 {
+      font-size: 40px; font-weight: 900; letter-spacing: -1.2px;
+      line-height: 1.1; margin-bottom: 8px;
     }
-    .btn-signout:hover { border-color: var(--red); color: var(--red); }
+    .dash-hero p { font-size: 14px; color: var(--t2); }
 
-    /* Pages */
-    .page { display: none; padding: 28px 20px; max-width: 1200px; margin: 0 auto; }
-    .page.active { display: block; }
-
-    .page-head { margin-bottom: 24px; }
-    .page-head h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.4px; margin-bottom: 3px; }
-    .page-head p  { font-size: 13px; color: var(--muted); }
-
-    /* Admin banner */
+    /* ── ADMIN BANNER ── */
     .admin-banner {
-      background: linear-gradient(135deg, rgba(245,158,11,0.09) 0%, transparent 100%);
-      border: 1px solid rgba(245,158,11,0.2); border-radius: var(--r);
-      padding: 16px 20px; margin-bottom: 22px;
-      display: none; align-items: center; gap: 14px;
+      display: none; align-items: center; gap: 16px;
+      padding: 18px 22px;
+      background: linear-gradient(135deg, rgba(99,102,241,0.09) 0%, rgba(34,211,238,0.04) 100%);
+      border: 1px solid rgba(99,102,241,0.22);
+      border-radius: 18px; margin-bottom: 26px;
     }
     .admin-banner.show { display: flex; }
-    .admin-banner-icon { font-size: 24px; }
-    .admin-banner h3 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
-    .admin-banner p  { font-size: 12px; color: var(--muted); }
+    .admin-banner-ico {
+      width: 46px; height: 46px;
+      background: rgba(99,102,241,0.16); border-radius: 13px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 21px; flex-shrink: 0;
+    }
+    .admin-banner h3 { font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+    .admin-banner p  { font-size: 12px; color: var(--t2); }
 
-    /* Stats */
+    /* ── STATS ── */
     .stats-row {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
-      gap: 14px; margin-bottom: 26px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px; margin-bottom: 28px;
     }
     .stat-card {
-      background: var(--s1); border: 1px solid var(--border); border-radius: var(--r);
-      padding: 18px 20px; display: flex; align-items: center; gap: 14px;
-      transition: border-color 0.15s;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 24px 22px;
+      transition: all 0.3s cubic-bezier(0.34,1.2,0.64,1);
+      position: relative; overflow: hidden; cursor: default;
     }
-    .stat-card:hover { border-color: rgba(245,158,11,0.3); }
-    .stat-icon {
-      width: 42px; height: 42px; border-radius: 10px;
-      display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;
+    .stat-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 60%);
+      opacity: 0; transition: opacity 0.3s;
     }
-    .stat-num { font-size: 26px; font-weight: 700; line-height: 1; margin-bottom: 3px; }
-    .stat-lbl { font-size: 11px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
-
-    /* Section cards */
-    .section { background: var(--s1); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; margin-bottom: 20px; }
-    .section-head {
+    .stat-card:hover {
+      border-color: var(--border-h);
+      transform: translateY(-3px);
+      box-shadow: 0 20px 48px rgba(0,0,0,0.35);
+    }
+    .stat-card:hover::before { opacity: 1; }
+    .stat-top {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 15px 20px; border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
     }
-    .section-head h3 { font-size: 14px; font-weight: 600; }
-    .src-tag { font-size: 11px; color: var(--faint); }
+    .stat-ico {
+      width: 42px; height: 42px; border-radius: 11px;
+      display: flex; align-items: center; justify-content: center; font-size: 19px;
+    }
+    .stat-num {
+      font-size: 40px; font-weight: 900; letter-spacing: -2px; line-height: 1;
+      margin-bottom: 5px;
+    }
+    .stat-lbl { font-size: 12px; color: var(--t2); font-weight: 500; }
 
-    /* Table */
+    /* ── CTA ── */
+    .cta-book {
+      display: none; align-items: center; justify-content: space-between; gap: 20px;
+      padding: 22px 26px;
+      background: linear-gradient(135deg, rgba(99,102,241,0.1) 0%, rgba(34,211,238,0.05) 100%);
+      border: 1px solid rgba(99,102,241,0.22);
+      border-radius: 18px; margin-bottom: 24px;
+      cursor: pointer; transition: all 0.22s;
+    }
+    .cta-book:hover { border-color: rgba(99,102,241,0.45); transform: translateY(-2px); box-shadow: 0 16px 40px rgba(99,102,241,0.15); }
+    .cta-left h3 { font-size: 17px; font-weight: 800; margin-bottom: 4px; }
+    .cta-left p  { font-size: 12px; color: var(--t2); }
+    .cta-btn {
+      padding: 11px 20px; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--primary), #4f46e5);
+      border: none; border-radius: 11px;
+      color: #fff; font-size: 13px; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+      box-shadow: 0 4px 18px rgba(99,102,241,0.45);
+      white-space: nowrap;
+    }
+
+    /* ── SECTION CARD ── */
+    .section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px; overflow: hidden; margin-bottom: 20px;
+    }
+    .section-hd {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 24px; border-bottom: 1px solid var(--border);
+    }
+    .section-hd h3 { font-size: 14px; font-weight: 700; }
+    .src-tag {
+      font-size: 11px; color: var(--t3);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      padding: 3px 10px; border-radius: 99px;
+    }
+
+    /* ── TABLE ── */
     .tbl-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; }
+    thead tr { background: rgba(255,255,255,0.015); }
     th {
-      padding: 10px 16px; font-size: 10px; font-weight: 600; color: var(--faint);
-      text-align: left; text-transform: uppercase; letter-spacing: 0.6px;
+      padding: 12px 22px;
+      font-size: 10px; font-weight: 700; color: var(--t3);
+      text-align: left; text-transform: uppercase; letter-spacing: 0.9px;
       border-bottom: 1px solid var(--border); white-space: nowrap;
     }
     td {
-      padding: 13px 16px; font-size: 13px;
-      border-bottom: 1px solid rgba(51,65,85,0.4); white-space: nowrap;
+      padding: 16px 22px; font-size: 13px;
+      border-bottom: 1px solid rgba(255,255,255,0.03); white-space: nowrap;
     }
     tr:last-child td { border-bottom: none; }
-    tr:hover td { background: rgba(255,255,255,0.012); }
+    tbody tr { transition: background 0.15s; }
+    tbody tr:hover td { background: rgba(99,102,241,0.05); }
 
-    .bid { color: var(--primary); font-weight: 600; font-family: monospace; font-size: 12px; }
+    .bid {
+      font-family: 'SF Mono','Fira Code',monospace; font-size: 11px; font-weight: 600;
+      color: var(--pl); background: rgba(99,102,241,0.1);
+      padding: 3px 9px; border-radius: 6px;
+    }
 
-    /* Badges */
+    /* ── BADGES ── */
     .badge {
       display: inline-flex; align-items: center; gap: 5px;
-      padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600;
+      padding: 4px 10px; border-radius: 99px;
+      font-size: 11px; font-weight: 600;
     }
-    .badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; }
-    .badge-pending     { background: rgba(245,158,11,0.15); color: #f59e0b; }
-    .badge-pending::before     { background: #f59e0b; }
-    .badge-confirmed   { background: rgba(59,130,246,0.15);  color: #3b82f6; }
-    .badge-confirmed::before   { background: #3b82f6; }
-    .badge-in_progress { background: rgba(139,92,246,0.15); color: #8b5cf6; }
-    .badge-in_progress::before { background: #8b5cf6; }
-    .badge-completed   { background: rgba(16,185,129,0.15);  color: #10b981; }
-    .badge-completed::before   { background: #10b981; }
-    .badge-cancelled   { background: rgba(239,68,68,0.12);   color: #ef4444; }
-    .badge-cancelled::before   { background: #ef4444; }
+    .badge::before { content:''; width:5px; height:5px; border-radius:50%; }
+    .badge-pending     { background:rgba(245,158,11,0.12); color:#fbbf24; }
+    .badge-pending::before     { background:#fbbf24; }
+    .badge-confirmed   { background:rgba(59,130,246,0.12);  color:#60a5fa; }
+    .badge-confirmed::before   { background:#60a5fa; }
+    .badge-in_progress { background:rgba(139,92,246,0.12); color:#a78bfa; }
+    .badge-in_progress::before { background:#a78bfa; }
+    .badge-completed   { background:rgba(16,185,129,0.12);  color:#34d399; }
+    .badge-completed::before   { background:#34d399; }
+    .badge-cancelled   { background:rgba(239,68,68,0.1);    color:#f87171; }
+    .badge-cancelled::before   { background:#f87171; }
 
     .status-sel {
-      padding: 5px 8px; background: var(--s2);
-      border: 1px solid var(--border); border-radius: 6px;
-      color: var(--muted); font-size: 11px; font-family: inherit;
-      cursor: pointer; outline: none; transition: border-color 0.15s;
+      padding: 6px 10px;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      border-radius: var(--rxs); color: var(--t2); font-size: 11px;
+      font-family: inherit; cursor: pointer; outline: none; transition: all 0.2s;
     }
-    .status-sel:hover { border-color: var(--primary); }
+    .status-sel:hover { border-color: var(--primary); color: var(--text); }
 
-    /* Empty / loading */
-    .empty { padding: 52px 20px; text-align: center; }
-    .empty-icon { font-size: 34px; opacity: 0.28; margin-bottom: 12px; }
-    .empty h4 { font-size: 14px; color: var(--muted); margin-bottom: 5px; }
-    .empty p  { font-size: 12px; color: var(--faint); }
+    /* ── EMPTY / SPINNER ── */
+    .empty { padding: 68px 20px; text-align: center; }
+    .empty-ico { font-size: 40px; opacity: 0.18; margin-bottom: 14px; display: block; }
+    .empty h4  { font-size: 15px; font-weight: 600; color: var(--t2); margin-bottom: 5px; }
+    .empty p   { font-size: 13px; color: var(--t3); }
 
     .spinner {
-      display: inline-block; width: 18px; height: 18px;
-      border: 2px solid var(--border); border-top-color: var(--primary);
-      border-radius: 50%; animation: spin 0.6s linear infinite;
+      display: inline-block; width: 22px; height: 22px;
+      border: 2px solid rgba(255,255,255,0.07);
+      border-top-color: var(--primary);
+      border-radius: 50%; animation: spin 0.7s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* CTA book */
-    .cta-book {
-      background: linear-gradient(135deg, rgba(245,158,11,0.09) 0%, rgba(245,158,11,0.03) 100%);
-      border: 1px solid rgba(245,158,11,0.2); border-radius: var(--r);
-      padding: 18px 22px; display: flex; align-items: center; justify-content: space-between;
-      cursor: pointer; transition: border-color 0.15s; margin-bottom: 22px;
-    }
-    .cta-book:hover { border-color: rgba(245,158,11,0.4); }
-    .cta-left h3 { font-size: 16px; font-weight: 700; margin-bottom: 3px; }
-    .cta-left p  { font-size: 12px; color: var(--muted); }
-    .cta-arrow {
-      width: 36px; height: 36px; background: var(--primary); border-radius: 9px;
-      display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0;
-    }
+    /* ── PAGE HEAD ── */
+    .page-head { margin-bottom: 30px; }
+    .page-head h1 { font-size: 30px; font-weight: 900; letter-spacing: -0.8px; margin-bottom: 4px; }
+    .page-head p  { font-size: 13px; color: var(--t2); }
 
-    /* Book Service */
+    /* ══════════════════════════════════════
+       BOOK SERVICE
+    ══════════════════════════════════════ */
     .book-layout {
-      display: grid; grid-template-columns: 1fr 330px; gap: 20px; align-items: start;
+      display: grid; grid-template-columns: 1fr 370px; gap: 24px; align-items: start;
     }
-    @media (max-width: 860px) { .book-layout { grid-template-columns: 1fr; } }
+    @media (max-width: 920px) { .book-layout { grid-template-columns: 1fr; } }
 
-    .svc-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
-    }
-    @media (max-width: 560px) { .svc-grid { grid-template-columns: repeat(2, 1fr); } }
+    .svc-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 13px; }
+    @media (max-width: 620px) { .svc-grid { grid-template-columns: repeat(2,1fr); } }
 
     .svc-card {
-      background: var(--s1); border: 2px solid var(--border); border-radius: var(--r);
-      padding: 18px 12px; cursor: pointer; transition: all 0.15s; text-align: center;
+      background: var(--card); border: 1.5px solid var(--border);
+      border-radius: 18px; padding: 24px 16px;
+      cursor: pointer; transition: all 0.28s cubic-bezier(0.34,1.4,0.64,1);
+      text-align: center; position: relative; overflow: hidden;
     }
-    .svc-card:hover { border-color: rgba(245,158,11,0.4); background: var(--s2); }
-    .svc-card.sel   { border-color: var(--primary); background: var(--pglow); }
-    .svc-icon  { font-size: 26px; margin-bottom: 8px; display: block; }
-    .svc-name  { font-size: 12px; font-weight: 600; margin-bottom: 2px; }
-    .svc-meta  { font-size: 11px; color: var(--faint); }
+    .svc-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(99,102,241,0.09) 0%, transparent 100%);
+      opacity: 0; transition: opacity 0.25s;
+    }
+    .svc-card:hover { border-color: rgba(99,102,241,0.38); transform: translateY(-4px); box-shadow: 0 20px 50px rgba(0,0,0,0.35); }
+    .svc-card:hover::before { opacity: 1; }
+    .svc-card.sel {
+      border-color: var(--primary);
+      background: rgba(99,102,241,0.09);
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.18), 0 16px 40px rgba(0,0,0,0.25);
+    }
+    .svc-card.sel::before { opacity: 1; }
+    .svc-emoji { font-size: 34px; margin-bottom: 12px; display: block; }
+    .svc-name  { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+    .svc-price { font-size: 18px; font-weight: 900; color: var(--pl); margin-bottom: 2px; }
+    .svc-dur   { font-size: 11px; color: var(--t3); }
 
+    /* ── BOOKING PANEL ── */
     .book-panel {
-      background: var(--s1); border: 1px solid var(--border); border-radius: var(--r);
-      padding: 20px; position: sticky; top: 80px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 18px; padding: 26px;
+      position: sticky; top: 88px;
     }
-    .bsum {
-      background: var(--pglow); border: 1px solid rgba(245,158,11,0.18);
-      border-radius: var(--rs); padding: 13px 15px; margin-bottom: 18px;
-      display: flex; align-items: center; gap: 10px;
+    .panel-title { font-size: 15px; font-weight: 800; margin-bottom: 22px; }
+
+    .bsel {
+      background: rgba(99,102,241,0.09);
+      border: 1px solid rgba(99,102,241,0.22);
+      border-radius: 13px; padding: 15px 16px;
+      display: flex; align-items: center; gap: 13px;
+      margin-bottom: 22px;
     }
-    .bsum-icon { font-size: 18px; }
-    .bsum-svc  { font-size: 13px; font-weight: 600; color: var(--primary); margin-bottom: 2px; }
-    .bsum-sub  { font-size: 11px; color: var(--faint); }
+    .bsel-ico  { font-size: 24px; }
+    .bsel-name { font-size: 14px; font-weight: 800; color: var(--pl); margin-bottom: 3px; }
+    .bsel-meta { font-size: 11px; color: var(--t3); }
 
-    .plabel { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-    .psec   { margin-bottom: 16px; }
-
+    .pf { margin-bottom: 18px; }
+    .plbl {
+      font-size: 11px; font-weight: 700; color: var(--t3);
+      text-transform: uppercase; letter-spacing: 0.9px;
+      margin-bottom: 8px; display: block;
+    }
     .pinput {
-      width: 100%; padding: 10px 12px;
-      background: var(--s2); border: 1px solid var(--border); border-radius: var(--rs);
-      color: var(--text); font-size: 13px; font-family: inherit; outline: none; transition: border-color 0.15s;
-      color-scheme: dark;
+      width: 100%; padding: 12px 15px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--rs);
+      color: var(--text); font-size: 13px; font-family: inherit;
+      outline: none; transition: all 0.2s; color-scheme: dark;
     }
-    .pinput:focus { border-color: var(--primary); }
-    .pinput::placeholder { color: var(--faint); }
+    .pinput:focus {
+      border-color: var(--primary);
+      background: rgba(99,102,241,0.07);
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+    }
+    .pinput::placeholder { color: var(--t3); }
 
-    .slots-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .slots-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
     .slot {
-      padding: 8px 4px; text-align: center; font-size: 11px; font-weight: 500;
-      background: var(--s2); border: 1px solid var(--border); border-radius: 6px;
-      cursor: pointer; color: var(--muted); transition: all 0.15s; font-family: inherit;
+      padding: 9px 5px; text-align: center;
+      font-size: 11px; font-weight: 600;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: var(--rxs); cursor: pointer;
+      color: var(--t2); transition: all 0.2s; font-family: inherit;
     }
-    .slot:hover { border-color: rgba(245,158,11,0.4); color: var(--text); }
-    .slot.sel   { border-color: var(--primary); background: var(--pglow); color: var(--primary); }
+    .slot:hover { border-color: rgba(99,102,241,0.42); color: var(--text); }
+    .slot.sel { border-color: var(--primary); background: rgba(99,102,241,0.13); color: var(--pl); }
 
-    .book-success {
-      padding: 12px; background: rgba(16,185,129,0.1);
-      border: 1px solid rgba(16,185,129,0.28); border-radius: var(--rs);
-      color: var(--green); font-size: 12px; display: none; text-align: center; margin-bottom: 10px;
+    .book-err {
+      padding: 11px 14px; border-radius: var(--rxs); font-size: 12px;
+      margin-bottom: 12px; display: none;
     }
-    .book-error {
-      padding: 10px 12px; background: rgba(239,68,68,0.1);
-      border: 1px solid rgba(239,68,68,0.28); border-radius: var(--rs);
-      color: var(--red); font-size: 12px; display: none; margin-bottom: 10px;
-    }
+    .book-err.e { background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.22); color:#fc8181; }
+    .book-err.s { background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.22); color:#6ee7b7; }
 
-    /* Search */
-    .search-box {
-      padding: 7px 12px; background: var(--s2);
-      border: 1px solid var(--border); border-radius: var(--rs);
-      color: var(--text); font-size: 12px; font-family: inherit;
-      outline: none; width: 210px; transition: border-color 0.15s;
+    /* ── SEARCH ── */
+    .search-input {
+      padding: 8px 14px;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      border-radius: var(--rxs); color: var(--text);
+      font-size: 12px; font-family: inherit;
+      outline: none; width: 240px; transition: all 0.2s; display: none;
     }
-    .search-box:focus { border-color: var(--primary); }
-    .search-box::placeholder { color: var(--faint); }
+    .search-input:focus { border-color: var(--primary); background: rgba(99,102,241,0.07); }
+    .search-input::placeholder { color: var(--t3); }
 
-    /* Toast */
+    /* ── TOAST ── */
     #toast {
-      position: fixed; bottom: 18px; right: 18px; z-index: 9999;
-      background: var(--s1); border: 1px solid var(--border); border-radius: var(--rs);
-      padding: 12px 16px; font-size: 13px; display: flex; align-items: center; gap: 10px;
-      box-shadow: 0 8px 28px rgba(0,0,0,0.45);
-      transform: translateY(60px); opacity: 0;
-      transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1); max-width: 300px;
+      position: fixed; bottom: 26px; right: 26px; z-index: 9999;
+      display: flex; align-items: center; gap: 11px;
+      padding: 15px 20px;
+      background: rgba(10,15,34,0.96);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 16px; font-size: 13px; font-weight: 500;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.55);
+      transform: translateY(90px); opacity: 0;
+      transition: all 0.38s cubic-bezier(0.34,1.4,0.64,1);
+      max-width: 330px;
     }
-    #toast.show   { transform: translateY(0); opacity: 1; }
+    #toast.show { transform: translateY(0); opacity: 1; }
     #toast.t-ok   { border-left: 3px solid var(--green); }
     #toast.t-err  { border-left: 3px solid var(--red); }
     #toast.t-info { border-left: 3px solid var(--blue); }
+    .toast-ico { font-size: 17px; flex-shrink: 0; }
+
+    /* ── DIVIDER ── */
+    .divider { height: 1px; background: var(--border); margin: 22px 0; }
+
+    @media (max-width: 640px) {
+      .nav-email { display: none; }
+      .dash-hero h1 { font-size: 28px; }
+      .page { padding: 24px 16px 60px; }
+      .auth-card { padding: 32px 22px; }
+    }
   </style>
 </head>
 <body>
 
-<!-- ============================================================
-     AUTH PAGE
-============================================================ -->
+<div class="bg-fx">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<!-- ══════════════════════════════════════
+     AUTH
+══════════════════════════════════════ -->
 <div id="authPage">
-  <div class="auth-left">
-    <div class="al-logo">
-      <div class="al-logo-box">🔧</div>
-      <div class="al-logo-name">AutoServe <em>Pro</em></div>
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="logo-mark">🔧</div>
+      <div class="logo-name">AutoServe <span class="grad">Pro</span></div>
     </div>
-    <div class="al-hero">
-      <h2>Professional<br>Vehicle Service<br>Booking</h2>
-      <p>Book oil changes, tire rotations, brake inspections and more — all in one place. Trusted by thousands of drivers.</p>
-      <div class="al-features">
-        <div class="al-feat"><div class="al-feat-dot"></div>Instant booking confirmation</div>
-        <div class="al-feat"><div class="al-feat-dot"></div>Email notifications on every update</div>
-        <div class="al-feat"><div class="al-feat-dot"></div>Full service history in your dashboard</div>
-        <div class="al-feat"><div class="al-feat-dot"></div>Secured by AWS Cognito</div>
-      </div>
+
+    <h1 class="auth-title" id="authTitle">Welcome back</h1>
+    <p  class="auth-sub"   id="authSub">Sign in to manage your service bookings</p>
+
+    <div class="auth-tabs" id="authTabs">
+      <button id="tabLogin"  class="auth-tab active" onclick="switchTab('login')">Sign In</button>
+      <button id="tabSignup" class="auth-tab"        onclick="switchTab('signup')">Sign Up</button>
     </div>
-    <div class="al-footer">© 2026 AutoServe Pro. All rights reserved.</div>
-  </div>
 
-  <div class="auth-right">
-    <div class="auth-card">
-      <div class="auth-mob-logo">
-        <div class="auth-mob-logo-box">🔧</div>
-        <div class="auth-mob-logo-text">AutoServe <em>Pro</em></div>
+    <div id="authErr" class="msg-err"></div>
+    <div id="authOk"  class="msg-ok"></div>
+
+    <!-- Login -->
+    <div id="loginForm" class="auth-form">
+      <div class="field">
+        <label>Email address</label>
+        <input type="email" id="loginEmail" placeholder="you@example.com"
+          onkeydown="if(event.key==='Enter')doLogin()">
       </div>
-
-      <h1 class="auth-title"    id="authTitle">Welcome back</h1>
-      <p  class="auth-subtitle" id="authSub">Sign in to manage your service bookings</p>
-
-      <div class="auth-tabs" id="authTabs">
-        <button id="tabLogin"  class="auth-tab active" onclick="switchAuthTab('login')">Sign In</button>
-        <button id="tabSignup" class="auth-tab"        onclick="switchAuthTab('signup')">Sign Up</button>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="loginPassword" placeholder="••••••••"
+          onkeydown="if(event.key==='Enter')doLogin()">
       </div>
+      <button class="btn-primary" id="btnLogin" onclick="doLogin()">Sign In →</button>
+      <p class="powered">🔐 Secured by AWS Cognito</p>
+    </div>
 
-      <div id="authError"   class="auth-error"></div>
-      <div id="authSuccess" class="auth-success"></div>
-
-      <!-- Login -->
-      <div id="loginForm" class="auth-form">
-        <div class="afield">
-          <label>Email address</label>
-          <input type="email" id="loginEmail" placeholder="you@example.com"
-            onkeydown="if(event.key==='Enter')handleLogin()">
-        </div>
-        <div class="afield">
-          <label>Password</label>
-          <input type="password" id="loginPassword" placeholder="••••••••"
-            onkeydown="if(event.key==='Enter')handleLogin()">
-        </div>
-        <button class="btn-primary" id="btnLogin" onclick="handleLogin()">Sign In →</button>
-        <p class="powered">🔐 Secured by AWS Cognito</p>
+    <!-- Signup -->
+    <div id="signupForm" class="auth-form" style="display:none">
+      <div class="field">
+        <label>Email address</label>
+        <input type="email" id="signupEmail" placeholder="you@example.com">
       </div>
-
-      <!-- Signup -->
-      <div id="signupForm" class="auth-form" style="display:none">
-        <div class="afield">
-          <label>Email address</label>
-          <input type="email" id="signupEmail" placeholder="you@example.com">
-        </div>
-        <div class="afield">
-          <label>Password</label>
-          <input type="password" id="signupPassword" placeholder="Min 8 chars, uppercase + number">
-        </div>
-        <button class="btn-primary" id="btnSignup" onclick="handleSignup()">Create Account →</button>
-        <p class="powered">🔐 Secured by AWS Cognito</p>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="signupPassword" placeholder="Min 8 chars, uppercase + number">
       </div>
+      <button class="btn-primary" id="btnSignup" onclick="doSignup()">Create Account →</button>
+      <p class="powered">🔐 Secured by AWS Cognito</p>
+    </div>
 
-      <!-- Confirm -->
-      <div id="confirmForm" style="display:none; text-align:center">
-        <div class="confirm-env">✉️</div>
-        <p class="confirm-desc">A 6-digit code was sent to your email. Enter it below to verify your account.</p>
-        <br>
-        <div class="auth-form">
-          <div class="afield" style="text-align:left">
-            <label>Email</label>
-            <input type="email" id="confirmEmail" readonly>
-          </div>
-          <div class="afield" style="text-align:left">
-            <label>Verification Code</label>
-            <input type="text" id="confirmCode" placeholder="123456" maxlength="6"
-              style="letter-spacing:6px;font-size:18px;text-align:center"
-              onkeydown="if(event.key==='Enter')handleConfirm()">
-          </div>
-          <button class="btn-primary" onclick="handleConfirm()">Verify Email ✓</button>
-          <div class="form-stack">
-            <button class="btn-ghost" onclick="handleResend()">Resend Code</button>
-            <button class="btn-ghost" onclick="switchAuthTab('login')">← Back to Sign In</button>
-          </div>
+    <!-- Confirm -->
+    <div id="confirmForm" style="display:none;text-align:center">
+      <div class="confirm-icon">✉️</div>
+      <p class="confirm-desc">A 6-digit code was sent to your email. Enter it below to verify your account.</p>
+      <div class="auth-form">
+        <div class="field" style="text-align:left">
+          <label>Email</label>
+          <input type="email" id="confirmEmail" readonly>
+        </div>
+        <div class="field" style="text-align:left">
+          <label>Verification Code</label>
+          <input type="text" id="confirmCode" placeholder="123456" maxlength="6"
+            style="letter-spacing:8px;font-size:20px;text-align:center"
+            onkeydown="if(event.key==='Enter')doConfirm()">
+        </div>
+        <button class="btn-primary" onclick="doConfirm()">Verify Email ✓</button>
+        <div class="stack">
+          <button class="btn-ghost" onclick="doResend()">Resend Code</button>
+          <button class="btn-ghost" onclick="switchTab('login')">← Back to Sign In</button>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ============================================================
-     APP SCREEN
-============================================================ -->
+<!-- ══════════════════════════════════════
+     APP
+══════════════════════════════════════ -->
 <div id="appScreen">
-  <nav class="topnav">
-    <div class="nav-brand">
-      <div class="nav-brand-box">🔧</div>
-      <span>AutoServe <em>Pro</em></span>
+  <nav class="nav">
+    <div class="nav-logo">
+      <div class="nav-mark">🔧</div>
+      <div class="nav-name">AutoServe <span class="grad">Pro</span></div>
     </div>
+
     <div class="nav-tabs">
-      <button class="nav-tab active" id="nt-dashboard" onclick="showTab('dashboard')">
-        📊 Dashboard
-      </button>
-      <button class="nav-tab" id="nt-book" onclick="showTab('book')">
-        📅 Book Service
-      </button>
-      <button class="nav-tab" id="nt-bookings" onclick="showTab('bookings')">
-        📋 <span id="bookTabLabel">My Bookings</span>
+      <button class="nav-tab active" id="nt-dashboard" onclick="showTab('dashboard')">📊 Dashboard</button>
+      <button class="nav-tab"        id="nt-book"      onclick="showTab('book')">📅 Book Service</button>
+      <button class="nav-tab"        id="nt-bookings"  onclick="showTab('bookings')">
+        📋 <span id="bookLabel">My Bookings</span>
       </button>
     </div>
+
     <div class="nav-right">
-      <span class="badge-admin" id="adminBadge">Admin</span>
-      <span class="nav-email"   id="navEmail"></span>
-      <button class="btn-signout" onclick="handleLogout()">Sign out</button>
+      <span class="admin-pill" id="adminBadge">Admin</span>
+      <span class="nav-email"  id="navEmail"></span>
+      <button class="btn-out" onclick="doLogout()">Sign out</button>
     </div>
   </nav>
 
-  <!-- DASHBOARD -->
+  <!-- ── DASHBOARD ── -->
   <div id="page-dashboard" class="page active">
+
     <div class="admin-banner" id="adminBanner">
-      <div class="admin-banner-icon">🛡️</div>
+      <div class="admin-banner-ico">🛡️</div>
       <div>
-        <h3>Admin Panel</h3>
-        <p>You have full access — view all customer bookings and update service statuses.</p>
+        <h3>Admin Dashboard</h3>
+        <p>Full access enabled — view all customer bookings and update service statuses in real time.</p>
       </div>
     </div>
 
-    <div class="page-head">
-      <h1 id="dashTitle">Dashboard</h1>
-      <p  id="dashSub">Your service overview</p>
+    <div class="dash-hero">
+      <h1 id="dashTitle">Good to see you, <span class="grad" id="dashName">—</span></h1>
+      <p  id="dashSub">Here's your vehicle service overview</p>
     </div>
 
     <div class="stats-row">
       <div class="stat-card">
-        <div class="stat-icon" style="background:rgba(245,158,11,0.1)">📋</div>
-        <div><div class="stat-num" id="statTotal">—</div><div class="stat-lbl">Total</div></div>
+        <div class="stat-top">
+          <div class="stat-ico" style="background:rgba(99,102,241,0.13)">📋</div>
+        </div>
+        <div class="stat-num" id="statTotal">—</div>
+        <div class="stat-lbl">Total Bookings</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon" style="background:rgba(59,130,246,0.1)">✅</div>
-        <div><div class="stat-num" id="statConfirmed">—</div><div class="stat-lbl">Confirmed</div></div>
+        <div class="stat-top">
+          <div class="stat-ico" style="background:rgba(59,130,246,0.13)">✅</div>
+        </div>
+        <div class="stat-num" id="statConfirmed">—</div>
+        <div class="stat-lbl">Confirmed</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon" style="background:rgba(16,185,129,0.1)">🏁</div>
-        <div><div class="stat-num" id="statCompleted">—</div><div class="stat-lbl">Completed</div></div>
+        <div class="stat-top">
+          <div class="stat-ico" style="background:rgba(16,185,129,0.13)">🏁</div>
+        </div>
+        <div class="stat-num" id="statCompleted">—</div>
+        <div class="stat-lbl">Completed</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon" style="background:rgba(139,92,246,0.1)">⏳</div>
-        <div><div class="stat-num" id="statPending">—</div><div class="stat-lbl">Pending</div></div>
+        <div class="stat-top">
+          <div class="stat-ico" style="background:rgba(245,158,11,0.13)">⏳</div>
+        </div>
+        <div class="stat-num" id="statPending">—</div>
+        <div class="stat-lbl">Pending Review</div>
       </div>
     </div>
 
-    <div class="cta-book" id="ctaBook" onclick="showTab('book')" style="display:none">
+    <div class="cta-book" id="ctaBook" onclick="showTab('book')">
       <div class="cta-left">
         <h3>Ready for your next service?</h3>
         <p>Book oil change, tire rotation, brakes and more in under a minute.</p>
       </div>
-      <div class="cta-arrow">→</div>
+      <button class="cta-btn">Book Now →</button>
     </div>
 
     <div class="section">
-      <div class="section-head">
+      <div class="section-hd">
         <h3 id="dashTableTitle">Recent Bookings</h3>
         <span class="src-tag" id="dashSrc"></span>
       </div>
       <div class="tbl-wrap">
-        <div id="dashContainer">
-          <div class="empty"><div class="spinner"></div></div>
-        </div>
+        <div id="dashContainer"><div class="empty"><div class="spinner"></div></div></div>
       </div>
     </div>
   </div>
 
-  <!-- BOOK SERVICE -->
+  <!-- ── BOOK SERVICE ── -->
   <div id="page-book" class="page">
     <div class="page-head">
       <h1>Book a Service</h1>
-      <p>Choose a service, pick a date and time — we'll take care of the rest.</p>
+      <p>Choose a service, pick your date and time — we handle the rest.</p>
     </div>
+
     <div class="book-layout">
-      <div>
-        <div class="section" style="margin-bottom:0">
-          <div class="section-head"><h3>Select Service</h3></div>
-          <div style="padding:16px">
-            <div class="svc-grid">
-              <div class="svc-card sel" onclick="selectSvc(this,'Oil Change','30 min','$49')">
-                <span class="svc-icon">🛢️</span>
-                <div class="svc-name">Oil Change</div>
-                <div class="svc-meta">30 min · $49</div>
-              </div>
-              <div class="svc-card" onclick="selectSvc(this,'Tire Rotation','45 min','$29')">
-                <span class="svc-icon">🔄</span>
-                <div class="svc-name">Tire Rotation</div>
-                <div class="svc-meta">45 min · $29</div>
-              </div>
-              <div class="svc-card" onclick="selectSvc(this,'Brake Inspection','60 min','$49')">
-                <span class="svc-icon">🛑</span>
-                <div class="svc-name">Brake Inspection</div>
-                <div class="svc-meta">60 min · $49</div>
-              </div>
-              <div class="svc-card" onclick="selectSvc(this,'Battery Check','20 min','$19')">
-                <span class="svc-icon">🔋</span>
-                <div class="svc-name">Battery Check</div>
-                <div class="svc-meta">20 min · $19</div>
-              </div>
-              <div class="svc-card" onclick="selectSvc(this,'AC Service','90 min','$89')">
-                <span class="svc-icon">❄️</span>
-                <div class="svc-name">AC Service</div>
-                <div class="svc-meta">90 min · $89</div>
-              </div>
-              <div class="svc-card" onclick="selectSvc(this,'Full Service','120 min','$149')">
-                <span class="svc-icon">⚙️</span>
-                <div class="svc-name">Full Service</div>
-                <div class="svc-meta">120 min · $149</div>
-              </div>
+      <div class="section" style="margin-bottom:0">
+        <div class="section-hd"><h3>Select a Service</h3></div>
+        <div style="padding:20px">
+          <div class="svc-grid">
+            <div class="svc-card sel" onclick="pickSvc(this,'Oil Change','30 min','$49')">
+              <span class="svc-emoji">🛢️</span>
+              <div class="svc-name">Oil Change</div>
+              <div class="svc-price">$49</div>
+              <div class="svc-dur">30 min</div>
+            </div>
+            <div class="svc-card" onclick="pickSvc(this,'Tire Rotation','45 min','$29')">
+              <span class="svc-emoji">🔄</span>
+              <div class="svc-name">Tire Rotation</div>
+              <div class="svc-price">$29</div>
+              <div class="svc-dur">45 min</div>
+            </div>
+            <div class="svc-card" onclick="pickSvc(this,'Brake Inspection','60 min','$49')">
+              <span class="svc-emoji">🛑</span>
+              <div class="svc-name">Brake Inspection</div>
+              <div class="svc-price">$49</div>
+              <div class="svc-dur">60 min</div>
+            </div>
+            <div class="svc-card" onclick="pickSvc(this,'Battery Check','20 min','$19')">
+              <span class="svc-emoji">🔋</span>
+              <div class="svc-name">Battery Check</div>
+              <div class="svc-price">$19</div>
+              <div class="svc-dur">20 min</div>
+            </div>
+            <div class="svc-card" onclick="pickSvc(this,'AC Service','90 min','$89')">
+              <span class="svc-emoji">❄️</span>
+              <div class="svc-name">AC Service</div>
+              <div class="svc-price">$89</div>
+              <div class="svc-dur">90 min</div>
+            </div>
+            <div class="svc-card" onclick="pickSvc(this,'Full Service','120 min','$149')">
+              <span class="svc-emoji">⚙️</span>
+              <div class="svc-name">Full Service</div>
+              <div class="svc-price">$149</div>
+              <div class="svc-dur">120 min</div>
             </div>
           </div>
         </div>
       </div>
 
       <div class="book-panel">
-        <div class="bsum">
-          <div class="bsum-icon">🔧</div>
+        <div class="panel-title">Booking Summary</div>
+
+        <div class="bsel">
+          <div class="bsel-ico">🔧</div>
           <div>
-            <div class="bsum-svc" id="bsumName">Oil Change</div>
-            <div class="bsum-sub" id="bsumMeta">30 min · $49</div>
+            <div class="bsel-name" id="bsumName">Oil Change</div>
+            <div class="bsel-meta" id="bsumMeta">30 min · $49</div>
           </div>
         </div>
-        <div class="psec">
-          <div class="plabel">Vehicle</div>
+
+        <div class="pf">
+          <span class="plbl">Vehicle</span>
           <input class="pinput" type="text" id="vehicleInput" placeholder="e.g. Honda Civic 2021">
         </div>
-        <div class="psec">
-          <div class="plabel">Date</div>
+        <div class="pf">
+          <span class="plbl">Date</span>
           <input class="pinput" type="date" id="dateInput">
         </div>
-        <div class="psec">
-          <div class="plabel">Time Slot</div>
+        <div class="pf">
+          <span class="plbl">Time Slot</span>
           <div class="slots-grid">
-            <button class="slot sel" onclick="selectSlot(this,'9:00 AM')">9:00 AM</button>
-            <button class="slot"     onclick="selectSlot(this,'10:30 AM')">10:30 AM</button>
-            <button class="slot"     onclick="selectSlot(this,'12:00 PM')">12:00 PM</button>
-            <button class="slot"     onclick="selectSlot(this,'2:00 PM')">2:00 PM</button>
-            <button class="slot"     onclick="selectSlot(this,'3:30 PM')">3:30 PM</button>
-            <button class="slot"     onclick="selectSlot(this,'5:00 PM')">5:00 PM</button>
+            <button class="slot sel" onclick="pickSlot(this,'9:00 AM')">9:00 AM</button>
+            <button class="slot"     onclick="pickSlot(this,'10:30 AM')">10:30 AM</button>
+            <button class="slot"     onclick="pickSlot(this,'12:00 PM')">12:00 PM</button>
+            <button class="slot"     onclick="pickSlot(this,'2:00 PM')">2:00 PM</button>
+            <button class="slot"     onclick="pickSlot(this,'3:30 PM')">3:30 PM</button>
+            <button class="slot"     onclick="pickSlot(this,'5:00 PM')">5:00 PM</button>
           </div>
         </div>
-        <div id="bookErr" class="book-error"></div>
-        <div id="bookOk"  class="book-success"></div>
-        <button class="btn-primary" id="btnBook" onclick="handleBooking()" style="width:100%">
+
+        <div id="bookErrEl" class="book-err e"></div>
+        <div id="bookOkEl"  class="book-err s"></div>
+
+        <button class="btn-primary" id="btnBook" onclick="doBook()" style="width:100%;margin-top:6px">
           Confirm Booking →
         </button>
       </div>
     </div>
   </div>
 
-  <!-- MY BOOKINGS / ALL BOOKINGS -->
+  <!-- ── MY / ALL BOOKINGS ── -->
   <div id="page-bookings" class="page">
     <div class="page-head">
       <h1 id="bpTitle">My Bookings</h1>
       <p  id="bpSub">Full history of your service appointments</p>
     </div>
     <div class="section">
-      <div class="section-head">
+      <div class="section-hd">
         <h3 id="bpSecTitle">Your Bookings</h3>
         <div style="display:flex;align-items:center;gap:10px">
-          <input class="search-box" id="searchBox" type="text" placeholder="Search email, vehicle, service…"
-            oninput="filterTable(this.value)" style="display:none">
+          <input class="search-input" id="searchBox" type="text"
+            placeholder="Search email, vehicle, service…"
+            oninput="filterTable(this.value)">
           <span class="src-tag" id="bpSrc"></span>
         </div>
       </div>
       <div class="tbl-wrap">
-        <div id="bpContainer">
-          <div class="empty"><div class="spinner"></div></div>
-        </div>
+        <div id="bpContainer"><div class="empty"><div class="spinner"></div></div></div>
       </div>
     </div>
   </div>
 </div>
 
-<div id="toast"></div>
+<div id="toast">
+  <span class="toast-ico" id="toastIco"></span>
+  <span id="toastMsg"></span>
+</div>
 
 <script>
-const API_BASE = '/api';
-let accessToken     = null;
-let currentUser     = null;
-let selectedService = 'Oil Change';
-let selectedSlot    = '9:00 AM';
-let bookingsCache   = null;
+const API = '/api';
+let token = null, user = null, cache = null;
+let selSvc  = 'Oil Change';
+let selSlot = '9:00 AM';
 
-// ── AUTH ──────────────────────────────────────────────────────
-function switchAuthTab(tab) {
-  const login = tab === 'login';
-  document.getElementById('tabLogin').classList.toggle('active', login);
-  document.getElementById('tabSignup').classList.toggle('active', !login);
-  document.getElementById('loginForm').style.display   = login  ? 'flex' : 'none';
-  document.getElementById('signupForm').style.display  = !login ? 'flex' : 'none';
-  document.getElementById('confirmForm').style.display = 'none';
-  document.getElementById('authTabs').style.display    = 'flex';
-  document.getElementById('authTitle').textContent     = login ? 'Welcome back' : 'Create account';
-  document.getElementById('authSub').textContent       = login
+/* ── AUTH ──────────────────────────────────────── */
+function switchTab(t) {
+  const login = t === 'login';
+  id('tabLogin').classList.toggle('active', login);
+  id('tabSignup').classList.toggle('active', !login);
+  show('loginForm',   login  ? 'flex' : 'none');
+  show('signupForm',  !login ? 'flex' : 'none');
+  show('confirmForm', 'none');
+  show('authTabs',    'flex');
+  id('authTitle').textContent = login ? 'Welcome back' : 'Create account';
+  id('authSub').textContent   = login
     ? 'Sign in to manage your service bookings'
     : 'Join thousands of drivers who trust AutoServe Pro';
   clearMsg();
 }
 
 function showConfirm(email) {
-  document.getElementById('authTabs').style.display    = 'none';
-  document.getElementById('loginForm').style.display   = 'none';
-  document.getElementById('signupForm').style.display  = 'none';
-  document.getElementById('confirmForm').style.display = 'block';
-  document.getElementById('confirmEmail').value        = email;
-  document.getElementById('authTitle').textContent     = 'Verify your email';
-  document.getElementById('authSub').textContent       = 'Enter the 6-digit code sent to your inbox';
+  show('authTabs',    'none');
+  show('loginForm',   'none');
+  show('signupForm',  'none');
+  show('confirmForm', 'block');
+  id('confirmEmail').value    = email;
+  id('authTitle').textContent = 'Verify your email';
+  id('authSub').textContent   = 'Enter the 6-digit code sent to your inbox';
   clearMsg();
 }
 
-async function handleLogin() {
-  const email = document.getElementById('loginEmail').value.trim();
-  const pass  = document.getElementById('loginPassword').value;
+async function doLogin() {
+  const email = id('loginEmail').value.trim();
+  const pass  = id('loginPassword').value;
   if (!email || !pass) { setErr('Please fill in all fields'); return; }
-  setLoading('btnLogin', true, 'Signing in…');
+  setBusy('btnLogin', true, 'Signing in…');
   try {
-    const res  = await fetch(`${API_BASE}/auth/login`, {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ email, password: pass })
-    });
-    const data = await res.json();
-    if (!res.ok) { setErr(data.error || 'Login failed'); return; }
-    accessToken  = data.access_token;
-    currentUser  = { email, group: data.group };
-    bookingsCache = null;
-    showApp();
+    const r = await post(`${API}/auth/login`, { email, password: pass });
+    if (!r.ok) { setErr(r.data.error || 'Login failed'); return; }
+    token = r.data.access_token;
+    user  = { email, group: r.data.group };
+    cache = null;
+    launchApp();
   } catch { setErr('Network error — please try again'); }
-  finally { setLoading('btnLogin', false, 'Sign In →'); }
+  finally { setBusy('btnLogin', false, 'Sign In →'); }
 }
 
-async function handleSignup() {
-  const email = document.getElementById('signupEmail').value.trim();
-  const pass  = document.getElementById('signupPassword').value;
+async function doSignup() {
+  const email = id('signupEmail').value.trim();
+  const pass  = id('signupPassword').value;
   if (!email || !pass) { setErr('Please fill in all fields'); return; }
-  setLoading('btnSignup', true, 'Creating account…');
+  setBusy('btnSignup', true, 'Creating account…');
   try {
-    const res  = await fetch(`${API_BASE}/auth/signup`, {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ email, password: pass })
-    });
-    const data = await res.json();
-    if (!res.ok) { setErr(data.error || 'Signup failed'); return; }
+    const r = await post(`${API}/auth/signup`, { email, password: pass });
+    if (!r.ok) { setErr(r.data.error || 'Signup failed'); return; }
     showConfirm(email);
   } catch { setErr('Network error — please try again'); }
-  finally { setLoading('btnSignup', false, 'Create Account →'); }
+  finally { setBusy('btnSignup', false, 'Create Account →'); }
 }
 
-async function handleConfirm() {
-  const email = document.getElementById('confirmEmail').value.trim();
-  const code  = document.getElementById('confirmCode').value.trim();
-  if (!code) { setErr('Please enter the verification code'); return; }
+async function doConfirm() {
+  const email = id('confirmEmail').value.trim();
+  const code  = id('confirmCode').value.trim();
+  if (!code) { setErr('Enter the verification code'); return; }
   try {
-    const res  = await fetch(`${API_BASE}/auth/confirm`, {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ email, code })
-    });
-    const data = await res.json();
-    if (!res.ok) { setErr(data.error || 'Verification failed'); return; }
+    const r = await post(`${API}/auth/confirm`, { email, code });
+    if (!r.ok) { setErr(r.data.error || 'Verification failed'); return; }
     setOk('Email verified! Redirecting to sign in…');
-    setTimeout(() => switchAuthTab('login'), 1500);
+    setTimeout(() => switchTab('login'), 1500);
   } catch { setErr('Network error'); }
 }
 
-async function handleResend() {
-  const email = document.getElementById('confirmEmail').value.trim();
+async function doResend() {
+  const email = id('confirmEmail').value.trim();
   try {
-    const res  = await fetch(`${API_BASE}/auth/resend`, {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ email })
-    });
-    const data = await res.json();
-    res.ok ? setOk('New code sent to your email.') : setErr(data.error || 'Failed to resend');
+    const r = await post(`${API}/auth/resend`, { email });
+    r.ok ? setOk('New code sent to your email.') : setErr(r.data.error || 'Failed to resend');
   } catch { setErr('Network error'); }
 }
 
-function handleLogout() {
-  accessToken = currentUser = bookingsCache = null;
-  document.getElementById('appScreen').style.display = 'none';
-  document.getElementById('authPage').style.display  = 'flex';
-  switchAuthTab('login');
+function doLogout() {
+  token = user = cache = null;
+  show('appScreen', 'none');
+  show('authPage', 'flex');
+  switchTab('login');
 }
 
-// ── APP INIT ──────────────────────────────────────────────────
-function showApp() {
-  document.getElementById('authPage').style.display  = 'none';
-  document.getElementById('appScreen').style.display = 'block';
+/* ── APP LAUNCH ─────────────────────────────────── */
+function launchApp() {
+  show('authPage', 'none');
+  show('appScreen', 'block');
+  const admin    = user.group === 'admins';
+  const firstName = user.email.split('@')[0];
 
-  const isAdmin = currentUser.group === 'admins';
-  document.getElementById('navEmail').textContent = currentUser.email;
+  id('navEmail').textContent  = user.email;
+  id('dashName').textContent  = firstName;
 
-  if (isAdmin) {
-    document.getElementById('adminBadge').style.display = 'inline-flex';
-    document.getElementById('adminBanner').classList.add('show');
-    document.getElementById('nt-book').classList.add('hidden');
-    document.getElementById('bookTabLabel').textContent = 'All Bookings';
-    document.getElementById('bpTitle').textContent      = 'All Bookings';
-    document.getElementById('bpSub').textContent        = 'Every booking across all customers';
-    document.getElementById('bpSecTitle').textContent   = 'Bookings';
-    document.getElementById('searchBox').style.display  = 'block';
-    document.getElementById('dashTitle').textContent    = 'Admin Dashboard';
-    document.getElementById('dashSub').textContent      = 'Platform-wide booking overview';
-    document.getElementById('dashTableTitle').textContent = 'All Bookings';
+  if (admin) {
+    id('adminBadge').style.display = 'inline-block';
+    id('adminBanner').classList.add('show');
+    id('nt-book').classList.add('hidden');
+    id('bookLabel').textContent    = 'All Bookings';
+    id('bpTitle').textContent      = 'All Bookings';
+    id('bpSub').textContent        = 'Every booking across all customers';
+    id('bpSecTitle').textContent   = 'Bookings';
+    id('searchBox').style.display  = 'block';
+    id('dashTitle').innerHTML      = 'Admin <span class="grad">Dashboard</span>';
+    id('dashSub').textContent      = 'Platform-wide overview — all customers';
+    id('dashTableTitle').textContent = 'All Bookings';
   } else {
-    document.getElementById('ctaBook').style.display    = 'flex';
-    document.getElementById('dashTitle').textContent    = 'Dashboard';
-    document.getElementById('dashSub').textContent      = currentUser.email;
+    id('ctaBook').style.display = 'flex';
+    id('dashTitle').innerHTML   = `Welcome back, <span class="grad">${firstName}</span>`;
+    id('dashSub').textContent   = 'Here\'s your vehicle service overview';
   }
 
   showTab('dashboard');
 }
 
-// ── TABS ──────────────────────────────────────────────────────
-function showTab(tab) {
-  ['dashboard','book','bookings'].forEach(t => {
-    document.getElementById(`page-${t}`).classList.toggle('active', t === tab);
-    const nt = document.getElementById(`nt-${t}`);
-    if (nt) nt.classList.toggle('active', t === tab);
+/* ── TABS ───────────────────────────────────────── */
+function showTab(t) {
+  ['dashboard','book','bookings'].forEach(k => {
+    id(`page-${k}`).classList.toggle('active', k === t);
+    const nt = id(`nt-${k}`);
+    if (nt) nt.classList.toggle('active', k === t);
   });
-  if (tab === 'dashboard') loadDashboard();
-  if (tab === 'bookings')  loadBookingsTab();
+  if (t === 'dashboard') loadDash();
+  if (t === 'bookings')  loadBookings();
 }
 
-// ── DATA ──────────────────────────────────────────────────────
-async function fetchData() {
-  const isAdmin = currentUser.group === 'admins';
-  const url = isAdmin ? `${API_BASE}/admin/bookings` : `${API_BASE}/bookings`;
-  const res  = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+/* ── DATA ───────────────────────────────────────── */
+async function fetchBookings() {
+  const admin = user.group === 'admins';
+  const url   = admin ? `${API}/admin/bookings` : `${API}/bookings`;
+  const res   = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
   if (!res.ok) throw new Error('fetch failed');
-  const data = await res.json();
-  bookingsCache = data.bookings;
+  const data  = await res.json();
+  cache = data.bookings;
   return data;
 }
 
-async function loadDashboard() {
-  document.getElementById('dashContainer').innerHTML = `<div class="empty"><div class="spinner"></div></div>`;
+async function loadDash() {
+  id('dashContainer').innerHTML = loading();
   try {
-    const data = await fetchData();
-    const b = data.bookings;
-    document.getElementById('statTotal').textContent     = b.length;
-    document.getElementById('statConfirmed').textContent = b.filter(x => x.status === 'confirmed').length;
-    document.getElementById('statCompleted').textContent = b.filter(x => x.status === 'completed').length;
-    document.getElementById('statPending').textContent   = b.filter(x => x.status === 'pending').length;
-    document.getElementById('dashSrc').textContent       = data.source === 'cache' ? '⚡ Redis cache' : '🗄️ Live from RDS';
-    renderTable('dashContainer', b.slice(0, 8), true);
+    const data = await fetchBookings();
+    const b    = data.bookings;
+    animNum('statTotal',     b.length);
+    animNum('statConfirmed', b.filter(x => x.status === 'confirmed').length);
+    animNum('statCompleted', b.filter(x => x.status === 'completed').length);
+    animNum('statPending',   b.filter(x => x.status === 'pending').length);
+    id('dashSrc').textContent = data.source === 'cache' ? '⚡ Redis cache' : '🗄️ Live RDS';
+    renderTable('dashContainer', b.slice(0,8), true);
   } catch {
-    document.getElementById('dashContainer').innerHTML =
-      `<div class="empty"><div class="empty-icon">⚠️</div><h4>Could not load data</h4><p>Check your connection and refresh.</p></div>`;
+    id('dashContainer').innerHTML = errState('Could not load data', 'Check your connection and try again.');
   }
 }
 
-async function loadBookingsTab() {
-  if (bookingsCache) { renderTable('bpContainer', bookingsCache, false); return; }
-  document.getElementById('bpContainer').innerHTML = `<div class="empty"><div class="spinner"></div></div>`;
+async function loadBookings() {
+  if (cache) { renderTable('bpContainer', cache, false); return; }
+  id('bpContainer').innerHTML = loading();
   try {
-    const data = await fetchData();
-    document.getElementById('bpSrc').textContent = data.source === 'cache' ? '⚡ Redis cache' : '🗄️ Live from RDS';
-    renderTable('bpContainer', bookingsCache, false);
+    const data = await fetchBookings();
+    id('bpSrc').textContent = data.source === 'cache' ? '⚡ Redis cache' : '🗄️ Live RDS';
+    renderTable('bpContainer', cache, false);
   } catch {
-    document.getElementById('bpContainer').innerHTML =
-      `<div class="empty"><div class="empty-icon">⚠️</div><h4>Failed to load bookings</h4></div>`;
+    id('bpContainer').innerHTML = errState('Failed to load bookings', '');
   }
 }
 
-// ── RENDER TABLE ─────────────────────────────────────────────
-function renderTable(id, rows, compact) {
-  const el      = document.getElementById(id);
-  const isAdmin = currentUser.group === 'admins';
+/* ── COUNTER ANIMATION ──────────────────────────── */
+function animNum(elId, target) {
+  const el  = id(elId);
+  if (!el)  return;
+  const dur = 900;
+  const t0  = performance.now();
+  (function step(now) {
+    const p = Math.min((now - t0) / dur, 1);
+    el.textContent = Math.round((1 - Math.pow(1 - p, 3)) * target);
+    if (p < 1) requestAnimationFrame(step);
+  })(t0);
+}
 
-  if (!rows || rows.length === 0) {
-    el.innerHTML = `
-      <div class="empty">
-        <div class="empty-icon">${isAdmin ? '📋' : '🔧'}</div>
-        <h4>${isAdmin ? 'No bookings yet' : 'No bookings yet'}</h4>
-        <p>${isAdmin ? 'Bookings appear here once customers start booking.' : 'Book your first service to get started.'}</p>
-      </div>`;
+/* ── RENDER TABLE ───────────────────────────────── */
+function renderTable(containerId, rows, compact) {
+  const el    = id(containerId);
+  const admin = user.group === 'admins';
+
+  if (!rows || !rows.length) {
+    el.innerHTML = `<div class="empty">
+      <span class="empty-ico">${admin ? '📋' : '🔧'}</span>
+      <h4>${admin ? 'No bookings yet' : 'No bookings yet'}</h4>
+      <p>${admin ? 'Bookings appear once customers start booking.' : 'Book your first service to get started.'}</p>
+    </div>`;
     return;
   }
 
-  const custH    = isAdmin ? `<th>Customer</th>` : '';
-  const actionH  = (isAdmin && !compact) ? `<th>Update Status</th>` : '';
+  const custH   = admin ? `<th>Customer</th>` : '';
+  const actionH = (admin && !compact) ? `<th>Update Status</th>` : '';
 
-  const html = rows.map(b => {
-    const custC   = isAdmin ? `<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis">${b.user_email || b.user_id.slice(0,14)+'…'}</td>` : '';
-    const actionC = (isAdmin && !compact)
+  const rows_html = rows.map(b => {
+    const custC = admin
+      ? `<td style="max-width:190px;overflow:hidden;text-overflow:ellipsis;color:var(--t2)">${b.user_email || b.user_id.slice(0,14)+'…'}</td>`
+      : '';
+    const actionC = (admin && !compact)
       ? `<td>
-           <select class="status-sel" onchange="updateStatus(${b.id},this.value)">
-             <option value="">— update —</option>
-             <option value="pending">Pending</option>
-             <option value="confirmed">Confirmed</option>
-             <option value="in_progress">In Progress</option>
-             <option value="completed">Completed</option>
-             <option value="cancelled">Cancelled</option>
-           </select>
-         </td>`
+          <select class="status-sel" onchange="doUpdateStatus(${b.id},this.value)">
+            <option value="">— update —</option>
+            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="in_progress">In Progress</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </td>`
       : '';
     return `<tr>
-      <td class="bid">SVC-${String(b.id).padStart(4,'0')}</td>
+      <td><span class="bid">SVC-${String(b.id).padStart(4,'0')}</span></td>
       ${custC}
-      <td>${b.vehicle}</td>
-      <td>${b.service}</td>
-      <td>${b.date}</td>
-      <td>${b.time_slot}</td>
+      <td>${b.vehicle}</td><td>${b.service}</td>
+      <td>${b.date}</td><td>${b.time_slot}</td>
       <td><span class="badge badge-${b.status}">${b.status.replace('_',' ')}</span></td>
       ${actionC}
     </tr>`;
   }).join('');
 
-  el.innerHTML = `
-    <table>
-      <thead><tr>
-        <th>Booking ID</th>${custH}<th>Vehicle</th><th>Service</th>
-        <th>Date</th><th>Time</th><th>Status</th>${actionH}
-      </tr></thead>
-      <tbody>${html}</tbody>
-    </table>`;
+  el.innerHTML = `<table>
+    <thead><tr><th>Booking ID</th>${custH}<th>Vehicle</th><th>Service</th><th>Date</th><th>Time</th><th>Status</th>${actionH}</tr></thead>
+    <tbody>${rows_html}</tbody>
+  </table>`;
 }
 
-// ── SEARCH ───────────────────────────────────────────────────
+/* ── SEARCH ─────────────────────────────────────── */
 function filterTable(q) {
-  if (!bookingsCache) return;
+  if (!cache) return;
   const lq = q.toLowerCase();
-  const f  = lq ? bookingsCache.filter(b =>
+  const f  = lq ? cache.filter(b =>
     (b.user_email||'').toLowerCase().includes(lq) ||
     b.vehicle.toLowerCase().includes(lq) ||
     b.service.toLowerCase().includes(lq) ||
     String(b.id).includes(lq)
-  ) : bookingsCache;
+  ) : cache;
   renderTable('bpContainer', f, false);
 }
 
-// ── SERVICE / SLOT SELECTION ──────────────────────────────────
-function selectSvc(el, name, dur, price) {
+/* ── SERVICE / SLOT ─────────────────────────────── */
+function pickSvc(el, name, dur, price) {
   document.querySelectorAll('.svc-card').forEach(c => c.classList.remove('sel'));
   el.classList.add('sel');
-  selectedService = name;
-  document.getElementById('bsumName').textContent = name;
-  document.getElementById('bsumMeta').textContent = `${dur} · ${price}`;
+  selSvc = name;
+  id('bsumName').textContent = name;
+  id('bsumMeta').textContent = `${dur} · ${price}`;
 }
 
-function selectSlot(el, slot) {
+function pickSlot(el, slot) {
   document.querySelectorAll('.slot').forEach(s => s.classList.remove('sel'));
   el.classList.add('sel');
-  selectedSlot = slot;
+  selSlot = slot;
 }
 
-// ── BOOKING ───────────────────────────────────────────────────
-async function handleBooking() {
-  const vehicle = document.getElementById('vehicleInput').value.trim();
-  const date    = document.getElementById('dateInput').value;
-  const errEl   = document.getElementById('bookErr');
-  const okEl    = document.getElementById('bookOk');
+/* ── BOOKING ─────────────────────────────────────── */
+async function doBook() {
+  const vehicle = id('vehicleInput').value.trim();
+  const date    = id('dateInput').value;
+  const errEl   = id('bookErrEl');
+  const okEl    = id('bookOkEl');
   errEl.style.display = okEl.style.display = 'none';
 
   if (!vehicle) { errEl.textContent = 'Please enter your vehicle'; errEl.style.display = 'block'; return; }
   if (!date)    { errEl.textContent = 'Please select a date';      errEl.style.display = 'block'; return; }
 
-  setLoading('btnBook', true, 'Booking…');
+  setBusy('btnBook', true, 'Booking…');
   try {
-    const res  = await fetch(`${API_BASE}/bookings`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
-      body: JSON.stringify({ vehicle, service: selectedService, date, time_slot: selectedSlot })
-    });
-    const data = await res.json();
-    if (!res.ok) { errEl.textContent = data.error || 'Booking failed'; errEl.style.display = 'block'; return; }
-    const ref = `SVC-${String(data.booking_id).padStart(4,'0')}`;
+    const r = await post(`${API}/bookings`, { vehicle, service: selSvc, date, time_slot: selSlot }, token);
+    if (!r.ok) { errEl.textContent = r.data.error || 'Booking failed'; errEl.style.display = 'block'; return; }
+    const ref = `SVC-${String(r.data.booking_id).padStart(4,'0')}`;
     okEl.textContent = `Booking confirmed! Reference ${ref}. Confirmation email on its way.`;
     okEl.style.display = 'block';
-    document.getElementById('vehicleInput').value = '';
-    document.getElementById('dateInput').value    = '';
-    bookingsCache = null;
-    showToast(`${ref} confirmed!`, 'ok');
+    id('vehicleInput').value = '';
+    id('dateInput').value    = '';
+    cache = null;
+    toast(`🎉 ${ref} confirmed!`, 'ok');
   } catch { errEl.textContent = 'Network error — please try again'; errEl.style.display = 'block'; }
-  finally { setLoading('btnBook', false, 'Confirm Booking →'); }
+  finally  { setBusy('btnBook', false, 'Confirm Booking →'); }
 }
 
-// ── ADMIN UPDATE STATUS ───────────────────────────────────────
-async function updateStatus(id, status) {
+/* ── ADMIN STATUS UPDATE ────────────────────────── */
+async function doUpdateStatus(bookId, status) {
   if (!status) return;
   try {
-    const res = await fetch(`${API_BASE}/admin/bookings/${id}/status`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
-      body: JSON.stringify({ status })
-    });
-    if (res.ok) {
-      bookingsCache = null;
-      showToast(`SVC-${String(id).padStart(4,'0')} → ${status.replace('_',' ')}`, 'ok');
-      loadBookingsTab();
+    const r = await fetchRaw(`${API}/admin/bookings/${bookId}/status`, 'PUT', { status });
+    if (r.ok) {
+      cache = null;
+      toast(`✅ SVC-${String(bookId).padStart(4,'0')} → ${status.replace('_',' ')}`, 'ok');
+      loadBookings();
     } else {
-      const d = await res.json();
-      showToast(d.error || 'Update failed', 'err');
+      const d = await r.json();
+      toast(d.error || 'Update failed', 'err');
     }
-  } catch { showToast('Network error', 'err'); }
+  } catch { toast('Network error', 'err'); }
 }
 
-// ── TOAST ─────────────────────────────────────────────────────
-let _toastT;
-function showToast(msg, type='info') {
-  const el = document.getElementById('toast');
-  el.className = `t-${type}`;
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(_toastT);
-  _toastT = setTimeout(() => el.classList.remove('show'), 3000);
+/* ── TOAST ──────────────────────────────────────── */
+let _tt;
+function toast(msg, type = 'info') {
+  const el  = id('toast');
+  const ico = { ok:'✅', err:'❌', info:'ℹ️' };
+  id('toastIco').textContent = ico[type] || 'ℹ️';
+  id('toastMsg').textContent = msg;
+  el.className = `t-${type} show`;
+  clearTimeout(_tt);
+  _tt = setTimeout(() => el.classList.remove('show'), 3600);
 }
 
-// ── UI HELPERS ────────────────────────────────────────────────
+/* ── HELPERS ─────────────────────────────────────── */
+const id = s => document.getElementById(s);
+const show = (s, d) => { const e = id(s); if (e) e.style.display = d; };
+
+const loading  = () => `<div class="empty"><div class="spinner"></div></div>`;
+const errState = (h, p) => `<div class="empty"><span class="empty-ico">⚠️</span><h4>${h}</h4><p>${p}</p></div>`;
+
+async function post(url, body, tok) {
+  const h = { 'Content-Type':'application/json' };
+  if (tok) h['Authorization'] = `Bearer ${tok}`;
+  const res = await fetch(url, { method:'POST', headers:h, body:JSON.stringify(body) });
+  return { ok: res.ok, data: await res.json() };
+}
+
+async function fetchRaw(url, method, body) {
+  return fetch(url, {
+    method,
+    headers: { 'Content-Type':'application/json', Authorization:`Bearer ${token}` },
+    body: JSON.stringify(body)
+  });
+}
+
 function setErr(m) {
-  const e = document.getElementById('authError');
+  const e = id('authErr');
   e.textContent = m; e.style.display = 'block';
-  document.getElementById('authSuccess').style.display = 'none';
+  id('authOk').style.display = 'none';
 }
 function setOk(m) {
-  const e = document.getElementById('authSuccess');
+  const e = id('authOk');
   e.textContent = m; e.style.display = 'block';
-  document.getElementById('authError').style.display = 'none';
+  id('authErr').style.display = 'none';
 }
 function clearMsg() {
-  document.getElementById('authError').style.display   = 'none';
-  document.getElementById('authSuccess').style.display = 'none';
+  id('authErr').style.display = 'none';
+  id('authOk').style.display  = 'none';
 }
-function setLoading(id, on, label) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.disabled     = on;
-  el.textContent  = label;
+function setBusy(elId, on, label) {
+  const el = id(elId); if (!el) return;
+  el.disabled    = on;
+  el.textContent = label;
 }
 
-// Set min booking date to today
 document.addEventListener('DOMContentLoaded', () => {
-  const d = document.getElementById('dateInput');
+  const d = id('dateInput');
   if (d) d.min = new Date().toISOString().split('T')[0];
 });
 </script>
