@@ -18,6 +18,7 @@ concurrency:
 env:
   AWS_REGION: ca-central-1
   TF_VERSION: 1.14.6
+  TF_STATE_BUCKET: autoserve-app-terraform-state
 
 jobs:
   # ===========================================================================
@@ -68,7 +69,7 @@ jobs:
       # Save plan to S3 (not GitHub artifacts — repo is public, tfplan can contain secrets)
       # run_id makes the key unique per workflow run so jobs never collide
       - name: Upload plan to S3
-        run: aws s3 cp tfplan s3://autoserve-app-terraform-state/plans/tfplan-${{ github.run_id }}
+        run: aws s3 cp tfplan s3://${{ env.TF_STATE_BUCKET }}/plans/tfplan-${{ github.run_id }}
 
       # Post plan output as PR comment so you can review before merging
       - name: Post Plan to PR
@@ -127,7 +128,29 @@ jobs:
 
       # Download the exact plan saved by Job 1 from S3
       - name: Download plan from S3
-        run: aws s3 cp s3://autoserve-app-terraform-state/plans/tfplan-${{ github.run_id }} tfplan
+        run: aws s3 cp s3://${{ env.TF_STATE_BUCKET }}/plans/tfplan-${{ github.run_id }} tfplan
+
+      # If a previous destroy left the secret in 7-day pending-deletion state,
+      # Terraform can't recreate it by name — force-delete it first.
+      - name: Clear pending-deletion Secrets Manager secret
+        run: |
+          PROJECT=$(grep 'project_name' terraform.tfvars | cut -d'"' -f2)
+          ENV=$(grep 'environment'  terraform.tfvars | cut -d'"' -f2)
+          SECRET_ID="${PROJECT}/${ENV}/db-credentials"
+          echo "Checking secret: $SECRET_ID"
+          STATUS=$(aws secretsmanager describe-secret \
+            --secret-id "$SECRET_ID" \
+            --region ${{ env.AWS_REGION }} \
+            --query 'DeletedDate' --output text 2>/dev/null || echo "NOT_FOUND")
+          if [ "$STATUS" != "None" ] && [ "$STATUS" != "NOT_FOUND" ]; then
+            echo "Secret pending deletion — force-deleting so Terraform can recreate it."
+            aws secretsmanager delete-secret \
+              --secret-id "$SECRET_ID" \
+              --force-delete-without-recovery \
+              --region ${{ env.AWS_REGION }}
+          else
+            echo "Secret is healthy or absent — nothing to do."
+          fi
 
       # Apply exactly what was planned — no re-plan, no surprises
       - name: Terraform Apply
