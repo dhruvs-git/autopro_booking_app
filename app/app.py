@@ -235,7 +235,8 @@ def login():
 
         tokens = response["AuthenticationResult"]
         claims = validate_token(tokens["AccessToken"])
-        group  = claims.get("cognito:groups", ["customers"])[0] if claims else "customers"
+        groups = claims.get("cognito:groups", []) if claims else []
+        group  = "admins" if "admins" in groups else "customers"
 
         return jsonify({
             "access_token":  tokens["AccessToken"],
@@ -332,12 +333,20 @@ def confirm_signup():
         )
 
         try:
-            cognito_client.admin_add_user_to_group(
+            existing = cognito_client.admin_list_groups_for_user(
                 UserPoolId=COGNITO_USER_POOL_ID,
-                Username=data["email"],
-                GroupName="customers"
+                Username=data["email"]
             )
-            logger.info(f"User confirmed and added to customers group: {data['email']}")
+            existing_groups = [g["GroupName"] for g in existing.get("Groups", [])]
+            if "admins" not in existing_groups:
+                cognito_client.admin_add_user_to_group(
+                    UserPoolId=COGNITO_USER_POOL_ID,
+                    Username=data["email"],
+                    GroupName="customers"
+                )
+                logger.info(f"User confirmed and added to customers group: {data['email']}")
+            else:
+                logger.info(f"User {data['email']} is already an admin — skipping customers group assignment")
         except Exception as e:
             logger.error(f"Group assignment failed (user still confirmed): {str(e)}")
         return jsonify({"message": "Email verified. You can now sign in."}), 200
