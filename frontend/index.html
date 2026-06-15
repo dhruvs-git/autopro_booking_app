@@ -933,6 +933,8 @@ async function doLogin() {
     token = r.data.access_token;
     user  = { email, group: r.data.group };
     cache = null;
+    localStorage.setItem('token', token);
+    localStorage.setItem('user',  JSON.stringify(user));
     launchApp();
   } catch { setErr('Network error — please try again'); }
   finally { setBusy('btnLogin', false, 'Sign In →'); }
@@ -973,6 +975,8 @@ async function doResend() {
 
 function doLogout() {
   token = user = cache = null;
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
   show('appScreen', 'none');
   show('authPage', 'flex');
   switchTab('login');
@@ -1260,6 +1264,15 @@ function setBusy(elId, on, label) {
 document.addEventListener('DOMContentLoaded', () => {
   const d = id('dateInput');
   if (d) d.min = new Date().toISOString().split('T')[0];
+
+  // Restore session on page refresh
+  const savedToken = localStorage.getItem('token');
+  const savedUser  = localStorage.getItem('user');
+  if (savedToken && savedUser) {
+    token = savedToken;
+    user  = JSON.parse(savedUser);
+    launchApp();
+  }
 });
 </script>
 </body>
