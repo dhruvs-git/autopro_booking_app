@@ -6,6 +6,18 @@ A production-grade vehicle service booking platform built entirely on AWS using 
 
 ---
 
+## Screenshots
+
+| Login | Customer Dashboard |
+|-------|--------------------|
+| <img src="screenshots/login_page.png" width="420"/> | <img src="screenshots/customer_page.png" width="420"/> |
+
+| Admin Dashboard | Admin — All Bookings |
+|-----------------|----------------------|
+| <img src="screenshots/admin_page.png" width="420"/> | <img src="screenshots/admin_page1.png" width="420"/> |
+
+---
+
 ## What It Does
 
 Customers book vehicle services (oil change, tire rotation, brakes, etc.) online. Admins see a dashboard with every booking across all customers and can update statuses in real time.
