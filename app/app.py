@@ -518,7 +518,7 @@ def admin_get_all_bookings():
 
         cache.setex(cache_key, 60, json.dumps(bookings))
         logger.info("Cache miss for admin:all_bookings — fetched from RDS")
-        return jsonify({"bookings": bookings, "source": "cache"}), 200
+        return jsonify({"bookings": bookings, "source": "database"}), 200
 
     except Exception as e:
         logger.error(f"Admin get bookings failed: {str(e)}")
