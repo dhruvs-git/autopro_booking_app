@@ -1,5 +1,7 @@
 # AutoServe Pro
 
+[![CI/CD Pipeline](https://github.com/dhruvs-git/autopro_booking_app/actions/workflows/deploy.yml/badge.svg)](https://github.com/dhruvs-git/autopro_booking_app/actions/workflows/deploy.yml)
+
 ![AutoServe Pro Architecture](autoserve_architecture.png)
 
 A production-grade vehicle service booking platform built entirely on AWS using Terraform, with a GitHub Actions CI/CD pipeline. Built as a learning project to understand how real cloud infrastructure is designed, secured, and deployed.
